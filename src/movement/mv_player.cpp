@@ -36,7 +36,7 @@ void MovementPlayer::OnProcessMovementPost()
 		this->inPerf = false;
 	}
 	this->processingMovement = false;
-	if (g_pKZUtils->GetGlobals()->frametime > 0.0f)
+	if (g_pSurfUtils->GetGlobals()->frametime > 0.0f)
 	{
 		this->oldAngles = this->moveDataPost.m_vecViewAngles;
 	}
@@ -179,7 +179,18 @@ void MovementPlayer::SetAngles(const QAngle &angles)
 	absAngles.x = 0;
 
 	pawn->Teleport(NULL, &absAngles, NULL);
-	g_pKZUtils->SnapViewAngles(pawn, angles);
+	g_pSurfUtils->SnapViewAngles(pawn, angles);
+}
+
+void MovementPlayer::SetGravityScale(const float scale)
+{
+	CBasePlayerPawn *pawn = this->GetPlayerPawn();
+	if (!pawn)
+	{
+		return;
+	}
+
+	pawn->SetGravityScale(scale);
 }
 
 TurnState MovementPlayer::GetTurning()
@@ -257,7 +268,7 @@ f32 MovementPlayer::GetGroundPosition()
 
 	trace_t trace;
 
-	g_pKZUtils->TracePlayerBBox(mv->m_vecAbsOrigin, ground, bounds, &filter, trace);
+	g_pSurfUtils->TracePlayerBBox(mv->m_vecAbsOrigin, ground, bounds, &filter, trace);
 
 	// Doesn't hit anything, fall back to the original ground
 	if (trace.m_bStartInSolid || trace.m_flFraction == 1.0f)
@@ -277,7 +288,7 @@ void MovementPlayer::RegisterTakeoff(bool jumped, bool fromLadder, Vector *overr
 	}
 	this->takeoffFromLadder = fromLadder;
 	this->takeoffOrigin = overrideOrigin ? *overrideOrigin : mv->m_vecAbsOrigin;
-	this->takeoffTime = g_pKZUtils->GetGlobals()->curtime - g_pKZUtils->GetGlobals()->frametime;
+	this->takeoffTime = g_pSurfUtils->GetGlobals()->curtime - g_pSurfUtils->GetGlobals()->frametime;
 	this->takeoffVelocity = mv->m_vecVelocity;
 	if (overrideOrigin)
 	{
@@ -303,8 +314,8 @@ void MovementPlayer::RegisterLanding(const Vector &landingVelocity, bool distbug
 	this->inPerf = false;
 	this->inRealPerf = false;
 	this->landingOrigin = mv->m_vecAbsOrigin;
-	this->landingTime = g_pKZUtils->GetGlobals()->curtime;
-	this->landingTimeServer = g_pKZUtils->GetServerGlobals()->curtime;
+	this->landingTime = g_pSurfUtils->GetGlobals()->curtime;
+	this->landingTimeServer = g_pSurfUtils->GetServerGlobals()->curtime;
 	this->landingVelocity = landingVelocity;
 	if (!distbugFix)
 	{
@@ -330,7 +341,7 @@ void MovementPlayer::RegisterLanding(const Vector &landingVelocity, bool distbug
 				this->landingOriginActual = mv->m_TouchList[i].trace.m_vEndPos;
 				this->landingTimeActual =
 					this->landingTime
-					- (1 - mv->m_TouchList[i].trace.m_flFraction) * g_pKZUtils->GetGlobals()->frametime; // TODO: make sure this is right
+					- (1 - mv->m_TouchList[i].trace.m_flFraction) * g_pSurfUtils->GetGlobals()->frametime; // TODO: make sure this is right
 				return;
 			}
 		}

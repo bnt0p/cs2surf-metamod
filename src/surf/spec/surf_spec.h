@@ -1,0 +1,29 @@
+#pragma once
+#include "../surf.h"
+
+class SurfSpecService : public SurfBaseService
+{
+	using SurfBaseService::SurfBaseService;
+
+private:
+	bool savedPosition;
+	Vector savedOrigin;
+	QAngle savedAngles;
+	bool savedOnLadder;
+
+public:
+	virtual void Reset() override;
+	static void Init();
+	bool HasSavedPosition();
+	void SavePosition();
+	void LoadPosition();
+	void ResetSavedPosition();
+
+	bool IsSpectating(SurfPlayer *target);
+	bool SpectatePlayer(const char *playerName);
+	bool CanSpectate();
+
+	void GetSpectatorList(CUtlVector<CUtlString> &spectatorList);
+	SurfPlayer *GetSpectatedPlayer();
+	SurfPlayer *GetNextSpectator(SurfPlayer *current);
+};

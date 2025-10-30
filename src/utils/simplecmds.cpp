@@ -2,9 +2,9 @@
 #include "common.h"
 #include "utils/utils.h"
 #include "simplecmds.h"
-#include "../kz/kz.h"
-#include "../kz/language/kz_language.h"
-#include "../kz/option/kz_option.h"
+#include "../surf/surf.h"
+#include "../surf/language/surf_language.h"
+#include "../surf/option/surf_option.h"
 #include "utils/tables.h"
 
 #include "tier0/memdbgon.h"
@@ -57,17 +57,17 @@ struct ScmdManager
 
 static_global ScmdManager g_cmdManager = {};
 
-static_global void PrintCategoryCommands(KZPlayer *player, i32 category, bool printEmpty)
+static_global void PrintCategoryCommands(SurfPlayer *player, i32 category, bool printEmpty)
 {
 	char tableName[64];
 	V_snprintf(tableName, sizeof(tableName), "Command List - %s", cmdFlagNames[category]);
-	CUtlString headers[KZ_ARRAYSIZE(columnKeys)];
-	for (u32 i = 0; i < KZ_ARRAYSIZE(columnKeys); i++)
+	CUtlString headers[SURF_ARRAYSIZE(columnKeys)];
+	for (u32 i = 0; i < SURF_ARRAYSIZE(columnKeys); i++)
 	{
 		headers[i] = player->languageService->PrepareMessage(columnKeys[i]).c_str();
 	}
 	Scmd *cmds = g_cmdManager.cmds;
-	utils::Table<KZ_ARRAYSIZE(columnKeys)> table(player->languageService->PrepareMessage(tableName).c_str(), headers);
+	utils::Table<SURF_ARRAYSIZE(columnKeys)> table(player->languageService->PrepareMessage(tableName).c_str(), headers);
 
 	u32 cmdCount = 0;
 	CUtlVector<CUtlString> uniqueCallbacks;
@@ -107,9 +107,9 @@ static_global void PrintCategoryCommands(KZPlayer *player, i32 category, bool pr
 	player->PrintConsole(false, false, table.GetSeparator("="));
 }
 
-SCMD(kz_help, SCFL_MISC)
+SCMD(surf_help, SCFL_MISC)
 {
-	KZPlayer *player = g_pKZPlayerManager->ToPlayer(controller);
+	SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(controller);
 	player->languageService->PrintChat(true, false, "Command Help Response (Chat)");
 	player->languageService->PrintConsole(false, false, "Command Help Response (Console)");
 	u64 category = 0;
@@ -118,7 +118,7 @@ SCMD(kz_help, SCFL_MISC)
 	{
 		for (i32 i = 1; i < args->ArgC(); i++)
 		{
-			for (i32 j = 0; j < KZ_ARRAYSIZE(cmdFlagNames); j++)
+			for (i32 j = 0; j < SURF_ARRAYSIZE(cmdFlagNames); j++)
 			{
 				if (!V_stricmp(args->Arg(i), cmdFlagNames[j]))
 				{
@@ -132,7 +132,7 @@ SCMD(kz_help, SCFL_MISC)
 	if (!foundCategory)
 	{
 		player->languageService->PrintConsole(false, false, "Command Help Response Category Hint (Console)");
-		for (i32 i = 0; i < KZ_ARRAYSIZE(cmdFlagNames); i++)
+		for (i32 i = 0; i < SURF_ARRAYSIZE(cmdFlagNames); i++)
 		{
 			PrintCategoryCommands(player, i, false);
 		}
@@ -256,7 +256,7 @@ META_RES scmd::OnClientCommand(CPlayerSlot &slot, const CCommand &args)
 
 	CCSPlayerController *controller = (CCSPlayerController *)GameEntitySystem()->GetEntityInstance(CEntityIndex((i32)slot.Get() + 1));
 
-	if (!controller || !g_pKZPlayerManager->ToPlayer(controller))
+	if (!controller || !g_pSurfPlayerManager->ToPlayer(controller))
 	{
 		return MRES_IGNORED;
 	}
@@ -293,7 +293,7 @@ META_RES scmd::OnDispatchConCommand(ConCommandRef cmd, const CCommandContext &ct
 
 	CCSPlayerController *controller = (CCSPlayerController *)utils::GetController(slot);
 
-	if (!cmd.IsValidRef() || !controller || !g_pKZPlayerManager->ToPlayer(controller))
+	if (!cmd.IsValidRef() || !controller || !g_pSurfPlayerManager->ToPlayer(controller))
 	{
 		return MRES_IGNORED;
 	}

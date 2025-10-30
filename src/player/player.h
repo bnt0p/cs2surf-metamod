@@ -111,7 +111,7 @@ public:
 
 	CServerSideClient *GetClient()
 	{
-		return g_pKZUtils->GetClientBySlot(GetPlayerSlot());
+		return g_pSurfUtils->GetClientBySlot(GetPlayerSlot());
 	}
 
 	void SetUnauthenticatedSteamID(u64 xuid)

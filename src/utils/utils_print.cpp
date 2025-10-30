@@ -353,7 +353,7 @@ void utils::PrintHTMLCentre(CBaseEntity *entity, const char *format, ...)
 	event->SetInt("userid", -1);
 
 	CPlayerSlot slot = controller->entindex() - 1;
-	IGameEventListener2 *listener = g_pKZUtils->GetLegacyGameEventListener(slot);
+	IGameEventListener2 *listener = g_pSurfUtils->GetLegacyGameEventListener(slot);
 	listener->FireGameEvent(event);
 	interfaces::pGameEventManager->FreeEvent(event);
 }

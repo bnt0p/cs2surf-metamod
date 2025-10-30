@@ -9,23 +9,20 @@
 #include "utils/gamesystem.h"
 #include "steam/steam_gameserver.h"
 
-#include "cs2kz.h"
+#include "cs2surf.h"
 #include "ctimer.h"
-#include "kz/kz.h"
-#include "kz/beam/kz_beam.h"
-#include "kz/jumpstats/kz_jumpstats.h"
-#include "kz/option/kz_option.h"
-#include "kz/quiet/kz_quiet.h"
-#include "kz/timer/kz_timer.h"
-#include "kz/timer/announce.h"
-#include "kz/timer/queries/base_request.h"
-#include "kz/telemetry/kz_telemetry.h"
-#include "kz/trigger/kz_trigger.h"
-#include "kz/db/kz_db.h"
-#include "kz/mappingapi/kz_mappingapi.h"
-#include "kz/global/kz_global.h"
-#include "kz/profile/kz_profile.h"
-#include "kz/pistol/kz_pistol.h"
+#include "surf/surf.h"
+#include "surf/option/surf_option.h"
+#include "surf/quiet/surf_quiet.h"
+#include "surf/timer/surf_timer.h"
+#include "surf/timer/announce.h"
+#include "surf/timer/queries/base_request.h"
+#include "surf/telemetry/surf_telemetry.h"
+#include "surf/trigger/surf_trigger.h"
+#include "surf/db/surf_db.h"
+#include "surf/mappingapi/surf_mappingapi.h"
+#include "surf/global/surf_global.h"
+#include "surf/profile/surf_profile.h"
 #include "utils/utils.h"
 #include "sdk/entity/cbasetrigger.h"
 
@@ -310,7 +307,7 @@ static_function void AddEntityHooks(CBaseEntity *entity)
 		hooks::entityTouchHooks.AddToTail(SH_ADD_MANUALHOOK(Touch, entity, SH_STATIC(Hook_OnTouchPost), true));
 		hooks::entityTouchHooks.AddToTail(SH_ADD_MANUALHOOK(EndTouch, entity, SH_STATIC(Hook_OnEndTouchPost), true));
 		CCSPlayerPawn *pawn = static_cast<CCSPlayerPawn *>(entity);
-		if (!V_stricmp(entity->GetClassname(), "player") && g_pKZPlayerManager->ToPlayer(pawn))
+		if (!V_stricmp(entity->GetClassname(), "player") && g_pSurfPlayerManager->ToPlayer(pawn))
 		{
 			hooks::entityTouchHooks.AddToTail(SH_ADD_MANUALHOOK(Teleport, pawn, SH_STATIC(Hook_OnTeleport), false));
 		}
@@ -343,7 +340,7 @@ void EntListener::OnEntitySpawned(CEntityInstance *pEntity)
 		CBaseTrigger *trigger = static_cast<CBaseTrigger *>(pEntity);
 		trigger->m_fEffects() &= ~EF_NODRAW;
 		AddEntityHooks(static_cast<CBaseEntity *>(pEntity));
-		KZ::mapapi::CheckEndTimerTrigger((CBaseTrigger *)pEntity);
+		Surf::mapapi::CheckEndTimerTrigger((CBaseTrigger *)pEntity);
 	}
 }
 
@@ -374,7 +371,7 @@ void hooks::HookEntities()
 static_function void Hook_OnStartTouch(CBaseEntity *pOther)
 {
 	CBaseEntity *pThis = META_IFACEPTR(CBaseEntity);
-	if (KZTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_KZPlugin.simulatingPhysics)
+	if (SurfTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_SurfPlugin.simulatingPhysics)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -385,7 +382,7 @@ static_function void Hook_OnStartTouch(CBaseEntity *pOther)
 static_function void Hook_OnStartTouchPost(CBaseEntity *pOther)
 {
 	CBaseEntity *pThis = META_IFACEPTR(CBaseEntity);
-	if (KZTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_KZPlugin.simulatingPhysics)
+	if (SurfTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_SurfPlugin.simulatingPhysics)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -395,7 +392,7 @@ static_function void Hook_OnStartTouchPost(CBaseEntity *pOther)
 static_function void Hook_OnTouch(CBaseEntity *pOther)
 {
 	CBaseEntity *pThis = META_IFACEPTR(CBaseEntity);
-	if (KZTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_KZPlugin.simulatingPhysics)
+	if (SurfTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_SurfPlugin.simulatingPhysics)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -405,7 +402,7 @@ static_function void Hook_OnTouch(CBaseEntity *pOther)
 static_function void Hook_OnTouchPost(CBaseEntity *pOther)
 {
 	CBaseEntity *pThis = META_IFACEPTR(CBaseEntity);
-	if (KZTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_KZPlugin.simulatingPhysics)
+	if (SurfTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_SurfPlugin.simulatingPhysics)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -415,7 +412,7 @@ static_function void Hook_OnTouchPost(CBaseEntity *pOther)
 static_function void Hook_OnEndTouch(CBaseEntity *pOther)
 {
 	CBaseEntity *pThis = META_IFACEPTR(CBaseEntity);
-	if (KZTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_KZPlugin.simulatingPhysics)
+	if (SurfTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_SurfPlugin.simulatingPhysics)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -425,7 +422,7 @@ static_function void Hook_OnEndTouch(CBaseEntity *pOther)
 static_function void Hook_OnEndTouchPost(CBaseEntity *pOther)
 {
 	CBaseEntity *pThis = META_IFACEPTR(CBaseEntity);
-	if (KZTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_KZPlugin.simulatingPhysics)
+	if (SurfTriggerService::IsManagedByTriggerService(pThis, pOther) && !g_SurfPlugin.simulatingPhysics)
 	{
 		RETURN_META(MRES_SUPERCEDE);
 	}
@@ -438,7 +435,7 @@ static_function void Hook_OnTeleport(const Vector *newPosition, const QAngle *ne
 	// Just to be sure.
 	if (this_->IsPawn())
 	{
-		MovementPlayer *player = g_pKZPlayerManager->ToPlayer(static_cast<CBasePlayerPawn *>(this_));
+		MovementPlayer *player = g_pSurfPlayerManager->ToPlayer(static_cast<CBasePlayerPawn *>(this_));
 		player->OnTeleport(newPosition, newAngles, newVelocity);
 	}
 	RETURN_META(MRES_IGNORED);
@@ -448,7 +445,7 @@ static_function void Hook_OnTeleport(const Vector *newPosition, const QAngle *ne
 static_function void Hook_OnChangeTeamPost(i32 team)
 {
 	CCSPlayerController *controller = META_IFACEPTR(CCSPlayerController);
-	MovementPlayer *player = g_pKZPlayerManager->ToPlayer(controller);
+	MovementPlayer *player = g_pSurfPlayerManager->ToPlayer(controller);
 	if (player)
 	{
 		player->OnChangeTeamPost(team);
@@ -459,28 +456,27 @@ static_function void Hook_OnChangeTeamPost(i32 team)
 static_function void Hook_CheckTransmit(CCheckTransmitInfo **pInfos, int infoCount, CBitVec<16384> &unk1, CBitVec<16384> &,
 										const Entity2Networkable_t **pNetworkables, const uint16 *pEntityIndicies, int nEntities)
 {
-	KZ::quiet::OnCheckTransmit(pInfos, infoCount);
-	KZProfileService::OnCheckTransmit();
+	Surf::quiet::OnCheckTransmit(pInfos, infoCount);
+	SurfProfileService::OnCheckTransmit();
 	RETURN_META(MRES_IGNORED);
 }
 
 // ISource2Server
 static_function void Hook_GameFrame(bool simulating, bool bFirstTick, bool bLastTick)
 {
-	VPROF_BUDGET(__func__, "CS2KZ");
-	g_KZPlugin.serverGlobals = *(g_pKZUtils->GetGlobals());
+	VPROF_BUDGET(__func__, "CS2Surf");
+	g_SurfPlugin.serverGlobals = *(g_pSurfUtils->GetGlobals());
 	RecordAnnounce::Check();
 	BaseRequest::CheckRequests();
-	KZTelemetryService::ActiveCheck();
-	KZBeamService::UpdateBeams();
-	KZProfileService::OnGameFrame();
+	SurfTelemetryService::ActiveCheck();
+	SurfProfileService::OnGameFrame();
 	RETURN_META(MRES_IGNORED);
 }
 
 static_function void Hook_GameServerSteamAPIActivated()
 {
 	g_steamAPI.Init();
-	g_pKZPlayerManager->OnSteamAPIActivated();
+	g_pSurfPlayerManager->OnSteamAPIActivated();
 }
 
 static_function void Hook_GameServerSteamAPIDeactivated() {}
@@ -489,40 +485,40 @@ static_function void Hook_GameServerSteamAPIDeactivated() {}
 static_function bool Hook_ClientConnect(CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, bool unk1,
 										CBufferString *pRejectReason)
 {
-	g_pKZPlayerManager->OnClientConnect(slot, pszName, xuid, pszNetworkID, unk1, pRejectReason);
+	g_pSurfPlayerManager->OnClientConnect(slot, pszName, xuid, pszNetworkID, unk1, pRejectReason);
 	RETURN_META_VALUE(MRES_IGNORED, true);
 }
 
 static_function void Hook_OnClientConnected(CPlayerSlot slot, const char *pszName, uint64 xuid, const char *pszNetworkID, const char *pszAddress,
 											bool bFakePlayer)
 {
-	g_pKZPlayerManager->OnClientConnected(slot, pszName, xuid, pszNetworkID, pszAddress, bFakePlayer);
+	g_pSurfPlayerManager->OnClientConnected(slot, pszName, xuid, pszNetworkID, pszAddress, bFakePlayer);
 	RETURN_META(MRES_IGNORED);
 }
 
 static_function void Hook_ClientFullyConnect(CPlayerSlot slot)
 {
-	g_pKZPlayerManager->OnClientFullyConnect(slot);
+	g_pSurfPlayerManager->OnClientFullyConnect(slot);
 	RETURN_META(MRES_IGNORED);
 }
 
 static_function void Hook_ClientPutInServer(CPlayerSlot slot, char const *pszName, int type, uint64 xuid)
 {
-	g_pKZPlayerManager->OnClientPutInServer(slot, pszName, type, xuid);
+	g_pSurfPlayerManager->OnClientPutInServer(slot, pszName, type, xuid);
 	RETURN_META(MRES_IGNORED);
 }
 
 static_function void Hook_ClientActive(CPlayerSlot slot, bool bLoadGame, const char *pszName, uint64 xuid)
 {
-	g_pKZPlayerManager->OnClientActive(slot, bLoadGame, pszName, xuid);
-	KZPlayer *player = g_pKZPlayerManager->ToPlayer(slot);
+	g_pSurfPlayerManager->OnClientActive(slot, bLoadGame, pszName, xuid);
+	SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(slot);
 	if (player->GetPlayerPawn())
 	{
 		AddEntityHooks(player->GetPlayerPawn());
 	}
 	else
 	{
-		Warning("[KZ] WARNING: Player pawn for slot %i not found!\n", slot.Get());
+		Warning("[Surf] WARNING: Player pawn for slot %i not found!\n", slot.Get());
 	}
 	RETURN_META(MRES_IGNORED);
 }
@@ -530,7 +526,7 @@ static_function void Hook_ClientActive(CPlayerSlot slot, bool bLoadGame, const c
 static_function void Hook_ClientDisconnect(CPlayerSlot slot, ENetworkDisconnectionReason reason, const char *pszName, uint64 xuid,
 										   const char *pszNetworkID)
 {
-	KZPlayer *player = g_pKZPlayerManager->ToPlayer(slot);
+	SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(slot);
 	// Immediately remove the player off the list. We don't need to keep them around.
 	if (player->GetController())
 	{
@@ -548,19 +544,19 @@ static_function void Hook_ClientDisconnect(CPlayerSlot slot, ENetworkDisconnecti
 	player->timerService->OnClientDisconnect();
 	player->optionService->OnClientDisconnect();
 	player->globalService->OnClientDisconnect();
-	g_pKZPlayerManager->OnClientDisconnect(slot, reason, pszName, xuid, pszNetworkID);
+	g_pSurfPlayerManager->OnClientDisconnect(slot, reason, pszName, xuid, pszNetworkID);
 	RETURN_META(MRES_IGNORED);
 }
 
 static_function void Hook_ClientVoice(CPlayerSlot slot)
 {
-	g_pKZPlayerManager->OnClientVoice(slot);
+	g_pSurfPlayerManager->OnClientVoice(slot);
 }
 
 static_function void Hook_ClientCommand(CPlayerSlot slot, const CCommand &args)
 {
-	VPROF_BUDGET(__func__, "CS2KZ");
-	if (META_RES result = KZ::misc::CheckBlockedRadioCommands(args[0]))
+	VPROF_BUDGET(__func__, "CS2Surf");
+	if (META_RES result = Surf::misc::CheckBlockedRadioCommands(args[0]))
 	{
 		RETURN_META(result);
 	}
@@ -574,9 +570,9 @@ static_function void Hook_ClientCommand(CPlayerSlot slot, const CCommand &args)
 // INetworkServerService
 static_function void Hook_StartupServer(const GameSessionConfiguration_t &config, ISource2WorldSession *, const char *)
 {
-	g_KZPlugin.AddonInit();
-	KZ::course::ClearCourses();
-	KZ::mapapi::Init();
+	g_SurfPlugin.AddonInit();
+	Surf::course::ClearCourses();
+	Surf::mapapi::Init();
 	RETURN_META(MRES_IGNORED);
 }
 
@@ -585,38 +581,38 @@ static_function bool Hook_FireEvent(IGameEvent *event, bool bDontBroadcast)
 {
 	if (event)
 	{
-		if (KZ_STREQI(event->GetName(), "player_death"))
+		if (SURF_STREQI(event->GetName(), "player_death"))
 		{
 			CEntityInstance *instance = event->GetPlayerPawn("userid");
-			KZPlayer *player = g_pKZPlayerManager->ToPlayer(instance->GetEntityIndex());
+			SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(instance->GetEntityIndex());
 			if (player)
 			{
 				player->timerService->OnPlayerDeath();
 				player->quietService->SendFullUpdate();
 			}
 		}
-		else if (KZ_STREQI(event->GetName(), "round_prestart"))
+		else if (SURF_STREQI(event->GetName(), "round_prestart"))
 		{
 			hooks::HookEntities();
-			KZ::mapapi::OnRoundPreStart();
+			Surf::mapapi::OnRoundPreStart();
 		}
-		else if (KZ_STREQI(event->GetName(), "round_start"))
+		else if (SURF_STREQI(event->GetName(), "round_start"))
 		{
 			interfaces::pEngine->ServerCommand("sv_full_alltalk 1");
-			KZTimerService::OnRoundStart();
-			KZ::misc::OnRoundStart();
-			KZ::mapapi::OnRoundStart();
+			SurfTimerService::OnRoundStart();
+			Surf::misc::OnRoundStart();
+			Surf::mapapi::OnRoundStart();
 		}
-		else if (KZ_STREQI(event->GetName(), "player_team"))
+		else if (SURF_STREQI(event->GetName(), "player_team"))
 		{
 			event->SetBool("silent", true);
 		}
-		else if (KZ_STREQI(event->GetName(), "player_spawn"))
+		else if (SURF_STREQI(event->GetName(), "player_spawn"))
 		{
 			CEntityInstance *instance = event->GetPlayerPawn("userid");
 			if (instance)
 			{
-				KZPlayer *player = g_pKZPlayerManager->ToPlayer(instance->GetEntityIndex());
+				SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(instance->GetEntityIndex());
 				if (player)
 				{
 					player->timerService->OnPlayerSpawn();
@@ -630,14 +626,14 @@ static_function bool Hook_FireEvent(IGameEvent *event, bool bDontBroadcast)
 // ICvar
 static_function void Hook_DispatchConCommand(ConCommandRef cmd, const CCommandContext &ctx, const CCommand &args)
 {
-	VPROF_BUDGET(__func__, "CS2KZ");
-	if (META_RES result = KZ::misc::CheckBlockedRadioCommands(args[0]))
+	VPROF_BUDGET(__func__, "CS2Surf");
+	if (META_RES result = Surf::misc::CheckBlockedRadioCommands(args[0]))
 	{
 		RETURN_META(result);
 	}
-	if (KZOptionService::GetOptionInt("overridePlayerChat", true))
+	if (SurfOptionService::GetOptionInt("overridePlayerChat", true))
 	{
-		KZ::misc::ProcessConCommand(cmd, ctx, args);
+		Surf::misc::ProcessConCommand(cmd, ctx, args);
 	}
 
 	META_RES mres = scmd::OnDispatchConCommand(cmd, ctx, args);
@@ -648,13 +644,13 @@ static_function void Hook_DispatchConCommand(ConCommandRef cmd, const CCommandCo
 static_function void Hook_PostEvent(CSplitScreenSlot nSlot, bool bLocalOnly, int nClientCount, const uint64 *clients, INetworkMessageInternal *pEvent,
 									const CNetMessage *pData, unsigned long nSize, NetChannelBufType_t bufType)
 {
-	KZ::quiet::OnPostEvent(pEvent, pData, clients);
+	Surf::quiet::OnPostEvent(pEvent, pData, clients);
 }
 
 // CEntitySystem
 static_function void Hook_CEntitySystem_Spawn(int nCount, const EntitySpawnInfo_t *pInfo)
 {
-	KZ::mapapi::OnSpawn(nCount, pInfo);
+	Surf::mapapi::OnSpawn(nCount, pInfo);
 }
 
 // INetworkGameServer
@@ -663,23 +659,22 @@ static_function bool Hook_ActivateServer()
 	// The host doesn't disconnect when the map changes.
 	if (!interfaces::pEngine->IsDedicatedServer())
 	{
-		KZPlayer *player = g_pKZPlayerManager->ToPlayer(CPlayerSlot(0));
+		SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(CPlayerSlot(0));
 		player->Reset();
 	}
-	u64 id = g_pKZUtils->GetCurrentMapWorkshopID();
-	u64 size = g_pKZUtils->GetCurrentMapSize();
+	u64 id = g_pSurfUtils->GetCurrentMapWorkshopID();
+	u64 size = g_pSurfUtils->GetCurrentMapSize();
 
-	META_CONPRINTF("[KZ] Loading map %s, workshop ID %llu, size %llu\n", g_pKZUtils->GetCurrentMapVPK().Get(), id, size);
+	META_CONPRINTF("[Surf] Loading map %s, workshop ID %llu, size %llu\n", g_pSurfUtils->GetCurrentMapVPK().Get(), id, size);
 
-	KZJumpstatsService::OnServerActivate();
 	RecordAnnounce::Clear();
-	KZ::misc::OnServerActivate();
-	KZDatabaseService::SetupMap();
-	KZGlobalService::OnActivateServer();
+	Surf::misc::OnServerActivate();
+	SurfDatabaseService::SetupMap();
+	SurfGlobalService::OnActivateServer();
 
 	char md5[33];
-	g_pKZUtils->GetCurrentMapMD5(md5, sizeof(md5));
-	META_CONPRINTF("[KZ] Map file md5: %s\n", md5);
+	g_pSurfUtils->GetCurrentMapMD5(md5, sizeof(md5));
+	META_CONPRINTF("[Surf] Map file md5: %s\n", md5);
 
 	RETURN_META_VALUE(MRES_IGNORED, 1);
 }
@@ -690,7 +685,7 @@ static_function CServerSideClientBase *Hook_ConnectClient(const char *pszName, n
 														  C2S_CONNECT_Message *pConnectMsg, const char *pszChallenge, const byte *pAuthTicket,
 														  int nAuthTicketLength, bool bIsLowViolence)
 {
-	g_pKZPlayerManager->OnConnectClient(pszName, pAddr, steam_handle, pConnectMsg, pszChallenge, pAuthTicket, nAuthTicketLength, bIsLowViolence);
+	g_pSurfPlayerManager->OnConnectClient(pszName, pAddr, steam_handle, pConnectMsg, pszChallenge, pAuthTicket, nAuthTicketLength, bIsLowViolence);
 	RETURN_META_VALUE(MRES_IGNORED, 0);
 }
 
@@ -698,7 +693,7 @@ static_function CServerSideClientBase *Hook_ConnectClientPost(const char *pszNam
 															  C2S_CONNECT_Message *pConnectMsg, const char *pszChallenge, const byte *pAuthTicket,
 															  int nAuthTicketLength, bool bIsLowViolence)
 {
-	g_pKZPlayerManager->OnConnectClientPost(pszName, pAddr, steam_handle, pConnectMsg, pszChallenge, pAuthTicket, nAuthTicketLength, bIsLowViolence);
+	g_pSurfPlayerManager->OnConnectClientPost(pszName, pAddr, steam_handle, pConnectMsg, pszChallenge, pAuthTicket, nAuthTicketLength, bIsLowViolence);
 	RETURN_META_VALUE(MRES_IGNORED, 0);
 }
 
@@ -706,17 +701,17 @@ static_function CServerSideClientBase *Hook_ConnectClientPost(const char *pszNam
 static_function void Hook_ServerGamePostSimulate(const EventServerGamePostSimulate_t *)
 {
 	ProcessTimers();
-	KZGlobalService::OnServerGamePostSimulate();
+	SurfGlobalService::OnServerGamePostSimulate();
 }
 
 static_function void Hook_BuildGameSessionManifest(const EventBuildGameSessionManifest_t *msg)
 {
-	Warning("[CS2KZ] IGameSystem::BuildGameSessionManifest\n");
+	Warning("[CS2Surf] IGameSystem::BuildGameSessionManifest\n");
 	IEntityResourceManifest *pResourceManifest = msg->m_pResourceManifest;
-	if (g_KZPlugin.IsAddonMounted())
+	if (g_SurfPlugin.IsAddonMounted())
 	{
-		Warning("[CS2KZ] Precache kz soundevents \n");
-		pResourceManifest->AddResource(KZ_WORKSHOP_ADDON_SNDEVENT_FILE);
+		Warning("[CS2Surf] Precache surf soundevents \n");
+		pResourceManifest->AddResource(SURF_WORKSHOP_ADDON_SNDEVENT_FILE);
 	}
 	pResourceManifest->AddResource("particles/ui/hud/ui_map_def_utility_trail.vpcf");
 	pResourceManifest->AddResource("particles/ui/annotation/ui_annotation_line_segment.vpcf");
@@ -726,6 +721,6 @@ static_function ILoadingSpawnGroup *Hook_OnCreateLoadingSpawnGroupHook(SpawnGrou
 																	   bool bConfirmResourcesLoaded,
 																	   const CUtlVector<const CEntityKeyValues *> *pKeyValues)
 {
-	KZ::mapapi::OnCreateLoadingSpawnGroupHook(pKeyValues);
+	Surf::mapapi::OnCreateLoadingSpawnGroupHook(pKeyValues);
 	RETURN_META_VALUE(MRES_IGNORED, 0);
 }

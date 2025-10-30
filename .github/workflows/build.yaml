@@ -28,13 +28,13 @@ jobs:
 
       - name: Build and run Docker image
         run: |
-          docker build . --file Dockerfile --tag cs2kz-linux-builder
-          docker run -v ./build:/app/build -v ./.git:/app/.git cs2kz-linux-builder
+          docker build . --file Dockerfile --tag cs2surf-linux-builder
+          docker run -v ./build:/app/build -v ./.git:/app/.git cs2surf-linux-builder
 
       - name: Archive build
         uses: actions/upload-artifact@v4
         with:
-          name: cs2kz-linux
+          name: cs2surf-linux
           path: ./build/package
 
   build-windows:
@@ -85,5 +85,5 @@ jobs:
       - name: Archive build
         uses: actions/upload-artifact@v4
         with:
-          name: cs2kz-windows
+          name: cs2surf-windows
           path: ./build/package

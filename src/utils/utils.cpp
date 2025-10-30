@@ -1,7 +1,7 @@
 #include "networkbasetypes.pb.h"
 
 #include "common.h"
-#include "cs2kz.h"
+#include "cs2surf.h"
 #include "addresses.h"
 #include "gameconfig.h"
 #include "utils.h"
@@ -33,7 +33,7 @@
 	}
 
 CGameConfig *g_pGameConfig = NULL;
-KZUtils *g_pKZUtils = NULL;
+SurfUtils *g_pSurfUtils = NULL;
 extern CSteamGameServerAPIContext g_steamAPI;
 
 #define SERVER_VERSION_KEY "ServerVersion="
@@ -51,7 +51,7 @@ bool utils::Initialize(ISmmAPI *ismm, char *error, size_t maxlen)
 	interfaces::pEngine->GetGameDir(gamedirpath);
 
 	std::string gamedirname = CGameConfig::GetDirectoryName(gamedirpath.Get());
-	const char *gamedataPath = "addons/cs2kz/gamedata/cs2kz-core.games.txt";
+	const char *gamedataPath = "addons/cs2surf/gamedata/cs2surf-core.games.txt";
 
 	g_pGameConfig = new CGameConfig(gamedirname, gamedataPath);
 	char conf_error[255] = "";
@@ -86,7 +86,7 @@ bool utils::Initialize(ISmmAPI *ismm, char *error, size_t maxlen)
 		Warning("%s\n", error);
 		return false;
 	}
-	g_pKZUtils = new KZUtils(TracePlayerBBox, GetLegacyGameEventListener, SnapViewAngles, EmitSound, SwitchTeam, SetPawn, CreateEntityByName,
+	g_pSurfUtils = new SurfUtils(TracePlayerBBox, GetLegacyGameEventListener, SnapViewAngles, EmitSound, SwitchTeam, SetPawn, CreateEntityByName,
 							 DispatchSpawn, RemoveEntity, DebugDrawMesh);
 
 	utils::UnlockConVars();
@@ -230,12 +230,12 @@ CPlayerSlot utils::GetEntityPlayerSlot(CBaseEntity *entity)
 
 void utils::PlaySoundToClient(CPlayerSlot player, const char *sound, f32 volume)
 {
-	if (strncmp(sound, "kz.", strlen("kz.")) == 0 && !g_KZPlugin.IsAddonMounted())
+	if (strncmp(sound, "surf.", strlen("surf.")) == 0 && !g_SurfPlugin.IsAddonMounted())
 	{
 		return;
 	}
 
-	if (g_KZPlugin.unloading)
+	if (g_SurfPlugin.unloading)
 	{
 		return;
 	}
@@ -244,7 +244,7 @@ void utils::PlaySoundToClient(CPlayerSlot player, const char *sound, f32 volume)
 	EmitSound_t soundParams;
 	soundParams.m_pSoundName = sound;
 	soundParams.m_flVolume = volume;
-	g_pKZUtils->EmitSound(filter, player.Get() + 1, soundParams);
+	g_pSurfUtils->EmitSound(filter, player.Get() + 1, soundParams);
 }
 
 f32 utils::NormalizeDeg(f32 a)
@@ -467,7 +467,7 @@ bool utils::IsSpawnValid(const Vector &origin)
 	filter.m_nObjectSetMask = RNQUERY_OBJECTS_ALL;
 	filter.m_nInteractsAs = 0x40000;
 	trace_t tr;
-	g_pKZUtils->TracePlayerBBox(origin, origin, bounds, &filter, tr);
+	g_pSurfUtils->TracePlayerBBox(origin, origin, bounds, &filter, tr);
 	if (tr.m_flFraction != 1.0 || tr.m_bStartInSolid)
 	{
 		return false;
@@ -529,7 +529,7 @@ bool utils::CanSeeBox(Vector origin, Vector mins, Vector maxs)
 	bbox_t bounds {};
 	CTraceFilter filter(MASK_PLAYERSOLID, COLLISION_GROUP_PLAYER_MOVEMENT, false);
 	trace_t trace;
-	g_pKZUtils->TracePlayerBBox(origin, traceDest, bounds, &filter, trace);
+	g_pSurfUtils->TracePlayerBBox(origin, traceDest, bounds, &filter, trace);
 
 	return !trace.DidHit();
 }
@@ -606,7 +606,7 @@ bool utils::FindValidPositionForTrigger(CBaseTrigger *trigger, Vector &originDes
 		filter.m_nObjectSetMask = RNQUERY_OBJECTS_ALL;
 		filter.m_nInteractsAs = 0x40000;
 		trace_t tr;
-		g_pKZUtils->TracePlayerBBox(center, bottomCenter, bounds, &filter, tr);
+		g_pSurfUtils->TracePlayerBBox(center, bottomCenter, bounds, &filter, tr);
 		originDest = tr.m_vEndPos;
 		anglesDest = vec3_angle;
 		return true;
@@ -627,13 +627,13 @@ bool utils::FindValidPositionForTrigger(CBaseTrigger *trigger, Vector &originDes
 void utils::ResetMapIfEmpty()
 {
 	// There are players in the server already, do not restart
-	if (g_pKZUtils->GetPlayerCount() > 0)
+	if (g_pSurfUtils->GetPlayerCount() > 0)
 	{
 		return;
 	}
 
 	// Don't restart if the server is just up to map reload loops.
-	if (g_pKZUtils->GetGlobals() && g_pKZUtils->GetGlobals()->curtime < 30.0f)
+	if (g_pSurfUtils->GetGlobals() && g_pSurfUtils->GetGlobals()->curtime < 30.0f)
 	{
 		return;
 	}
@@ -644,28 +644,28 @@ void utils::ResetMapIfEmpty()
 		return;
 	}
 
-	META_CONPRINTF("[KZ] Server is empty, triggering map reload...\n");
+	META_CONPRINTF("[Surf] Server is empty, triggering map reload...\n");
 	utils::ResetMap();
 }
 
 void utils::ResetMap()
 {
 	char cmd[MAX_PATH + 12]; // "changelevel " takes 12 characters
-	if (g_pKZUtils->GetCurrentMapWorkshopID() == 0)
+	if (g_pSurfUtils->GetCurrentMapWorkshopID() == 0)
 	{
-		if (!g_pKZUtils->GetGlobals() || !g_pKZUtils->GetGlobals()->mapname.ToCStr() || g_pKZUtils->GetGlobals()->mapname.ToCStr()[0] == 0)
+		if (!g_pSurfUtils->GetGlobals() || !g_pSurfUtils->GetGlobals()->mapname.ToCStr() || g_pSurfUtils->GetGlobals()->mapname.ToCStr()[0] == 0)
 		{
-			META_CONPRINTF("[KZ] Warning: Map name is empty, cannot reload the current map! Defaulting to de_dust2...\n");
+			META_CONPRINTF("[Surf] Warning: Map name is empty, cannot reload the current map! Defaulting to de_dust2...\n");
 			V_snprintf(cmd, sizeof(cmd), "changelevel de_dust2");
 		}
 		else
 		{
-			V_snprintf(cmd, sizeof(cmd), "changelevel %s", g_pKZUtils->GetGlobals()->mapname.ToCStr());
+			V_snprintf(cmd, sizeof(cmd), "changelevel %s", g_pSurfUtils->GetGlobals()->mapname.ToCStr());
 		}
 	}
 	else
 	{
-		V_snprintf(cmd, sizeof(cmd), "host_workshop_map %llu", g_pKZUtils->GetCurrentMapWorkshopID());
+		V_snprintf(cmd, sizeof(cmd), "host_workshop_map %llu", g_pSurfUtils->GetCurrentMapWorkshopID());
 	}
 
 	interfaces::pEngine->ServerCommand(cmd);

@@ -91,6 +91,7 @@ public:
 	virtual void GetAngles(QAngle *angles);
 	// It is not recommended use this to change the angle inside movement processing, it might not work!
 	virtual void SetAngles(const QAngle &angles);
+	virtual void SetGravityScale(const float scale);
 
 	virtual void GetBBoxBounds(bbox_t *bounds);
 

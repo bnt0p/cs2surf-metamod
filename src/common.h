@@ -63,11 +63,11 @@ typedef double f64;
 // str*cmp considered harmful.
 //  Macros to make sure you don't mess up checking if strings are equal.
 //  The I means case insensitive.
-#define KZ_STREQ(a, b)             (V_strcmp(a, b) == 0)
-#define KZ_STREQI(a, b)            (V_stricmp(a, b) == 0)
-#define KZ_STREQLEN(a, b, maxlen)  (V_strncmp(a, b, maxlen) == 0)
-#define KZ_STREQILEN(a, b, maxlen) (V_strnicmp(a, b, maxlen) == 0)
+#define SURF_STREQ(a, b)             (V_strcmp(a, b) == 0)
+#define SURF_STREQI(a, b)            (V_stricmp(a, b) == 0)
+#define SURF_STREQLEN(a, b, maxlen)  (V_strncmp(a, b, maxlen) == 0)
+#define SURF_STREQILEN(a, b, maxlen) (V_strnicmp(a, b, maxlen) == 0)
 // ARRAYSIZE gets undef'd if metamod_oslink is included after commonmacros.h. We can use our own implementation instead.
-#define KZ_ARRAYSIZE(a) ((sizeof(a) / sizeof(*(a))) / static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
+#define SURF_ARRAYSIZE(a) ((sizeof(a) / sizeof(*(a))) / static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
 
 #define VPROF_LEVEL 1

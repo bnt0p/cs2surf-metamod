@@ -2,7 +2,7 @@
 #include "gameconfig.h"
 #include "iserver.h"
 #include "interfaces.h"
-#include "cs2kz.h"
+#include "cs2surf.h"
 #include "ctimer.h"
 #include "keyvalues3.h"
 #include <filesystem.h>
@@ -17,17 +17,17 @@ static_global bool md5NeedsUpdating {};
 
 extern CGameConfig *g_pGameConfig;
 
-CGameConfig *KZUtils::GetGameConfig()
+CGameConfig *SurfUtils::GetGameConfig()
 {
 	return g_pGameConfig;
 }
 
-const CGlobalVars *KZUtils::GetServerGlobals()
+const CGlobalVars *SurfUtils::GetServerGlobals()
 {
-	return g_KZPlugin.simulatingPhysics ? &(g_KZPlugin.serverGlobals) : this->GetGlobals();
+	return g_SurfPlugin.simulatingPhysics ? &(g_SurfPlugin.serverGlobals) : this->GetGlobals();
 }
 
-CGlobalVars *KZUtils::GetGlobals()
+CGlobalVars *SurfUtils::GetGlobals()
 {
 	INetworkGameServer *server = g_pNetworkServerService->GetIGameServer();
 
@@ -39,52 +39,52 @@ CGlobalVars *KZUtils::GetGlobals()
 	return server->GetGlobals();
 }
 
-CBaseEntity *KZUtils::FindEntityByClassname(CEntityInstance *start, const char *name)
+CBaseEntity *SurfUtils::FindEntityByClassname(CEntityInstance *start, const char *name)
 {
 	return utils::FindEntityByClassname(start, name);
 }
 
-CBasePlayerController *KZUtils::GetController(CBaseEntity *entity)
+CBasePlayerController *SurfUtils::GetController(CBaseEntity *entity)
 {
 	return utils::GetController(entity);
 }
 
-CBasePlayerController *KZUtils::GetController(CPlayerSlot slot)
+CBasePlayerController *SurfUtils::GetController(CPlayerSlot slot)
 {
 	return utils::GetController(slot);
 }
 
-CPlayerSlot KZUtils::GetEntityPlayerSlot(CBaseEntity *entity)
+CPlayerSlot SurfUtils::GetEntityPlayerSlot(CBaseEntity *entity)
 {
 	return utils::GetEntityPlayerSlot(entity);
 }
 
-void KZUtils::SendConVarValue(CPlayerSlot slot, ConVarRefAbstract conVar, const char *value)
+void SurfUtils::SendConVarValue(CPlayerSlot slot, ConVarRefAbstract conVar, const char *value)
 {
 	utils::SendConVarValue(slot, conVar, value);
 }
 
-void KZUtils::SendMultipleConVarValues(CPlayerSlot slot, ConVarRefAbstract **conVars, const char **values, u32 size)
+void SurfUtils::SendMultipleConVarValues(CPlayerSlot slot, ConVarRefAbstract **conVars, const char **values, u32 size)
 {
 	utils::SendMultipleConVarValues(slot, conVars, values, size);
 }
 
-f32 KZUtils::NormalizeDeg(f32 a)
+f32 SurfUtils::NormalizeDeg(f32 a)
 {
 	return utils::NormalizeDeg(a);
 }
 
-f32 KZUtils::GetAngleDifference(const f32 source, const f32 target, const f32 c, bool relative)
+f32 SurfUtils::GetAngleDifference(const f32 source, const f32 target, const f32 c, bool relative)
 {
 	return utils::GetAngleDifference(source, target, c, relative);
 }
 
-CGameEntitySystem *KZUtils::GetGameEntitySystem()
+CGameEntitySystem *SurfUtils::GetGameEntitySystem()
 {
 	return GameEntitySystem();
 }
 
-void KZUtils::AddTimer(CTimerBase *timer, bool preserveMapChange)
+void SurfUtils::AddTimer(CTimerBase *timer, bool preserveMapChange)
 {
 	if (preserveMapChange)
 	{
@@ -96,7 +96,7 @@ void KZUtils::AddTimer(CTimerBase *timer, bool preserveMapChange)
 	}
 }
 
-void KZUtils::RemoveTimer(CTimerBase *timer)
+void SurfUtils::RemoveTimer(CTimerBase *timer)
 {
 	FOR_EACH_VEC(g_PersistentTimers, i)
 	{
@@ -116,7 +116,7 @@ void KZUtils::RemoveTimer(CTimerBase *timer)
 	}
 }
 
-CUtlVector<CServerSideClient *> *KZUtils::GetClientList()
+CUtlVector<CServerSideClient *> *SurfUtils::GetClientList()
 {
 	if (!g_pNetworkServerService)
 	{
@@ -126,7 +126,7 @@ CUtlVector<CServerSideClient *> *KZUtils::GetClientList()
 	return (CUtlVector<CServerSideClient *> *)((char *)g_pNetworkServerService->GetIGameServer() + offset);
 }
 
-CUtlString KZUtils::GetCurrentMapName(bool *result)
+CUtlString SurfUtils::GetCurrentMapName(bool *result)
 {
 	CNetworkGameServerBase *networkGameServer = (CNetworkGameServerBase *)g_pNetworkServerService->GetIGameServer();
 	if (networkGameServer)
@@ -138,7 +138,7 @@ CUtlString KZUtils::GetCurrentMapName(bool *result)
 		return networkGameServer->GetMapName();
 	}
 
-	const CGlobalVars *globals = g_pKZUtils->GetGlobals();
+	const CGlobalVars *globals = g_pSurfUtils->GetGlobals();
 	if (globals && strlen(globals->mapname.ToCStr()))
 	{
 		if (result)
@@ -155,7 +155,7 @@ CUtlString KZUtils::GetCurrentMapName(bool *result)
 	return "";
 }
 
-u64 KZUtils::GetCurrentMapWorkshopID()
+u64 SurfUtils::GetCurrentMapWorkshopID()
 {
 	CUtlString directory = this->GetCurrentMapDirectory();
 	if (directory.MatchesPattern("*workshop*"))
@@ -165,7 +165,7 @@ u64 KZUtils::GetCurrentMapWorkshopID()
 	return 0;
 }
 
-CUtlString KZUtils::GetCurrentMapVPK()
+CUtlString SurfUtils::GetCurrentMapVPK()
 {
 	CUtlString map = this->GetCurrentMapName();
 	if (map.IsEmpty())
@@ -191,12 +191,12 @@ CUtlString KZUtils::GetCurrentMapVPK()
 	return "";
 }
 
-CUtlString KZUtils::GetCurrentMapDirectory()
+CUtlString SurfUtils::GetCurrentMapDirectory()
 {
 	return this->GetCurrentMapVPK().DirName();
 }
 
-u64 KZUtils::GetCurrentMapSize()
+u64 SurfUtils::GetCurrentMapSize()
 {
 	CUtlString currentMap = this->GetCurrentMapVPK();
 	u32 size = 0;
@@ -217,12 +217,12 @@ u64 KZUtils::GetCurrentMapSize()
 	return size;
 }
 
-bool KZUtils::UpdateCurrentMapMD5()
+bool SurfUtils::UpdateCurrentMapMD5()
 {
 	return this->GetFileMD5(this->GetCurrentMapVPK(), currentMapMD5, sizeof(currentMapMD5));
 }
 
-bool KZUtils::GetCurrentMapMD5(char *buffer, i32 size)
+bool SurfUtils::GetCurrentMapMD5(char *buffer, i32 size)
 {
 	if (md5NeedsUpdating)
 	{
@@ -236,7 +236,7 @@ bool KZUtils::GetCurrentMapMD5(char *buffer, i32 size)
 	return false;
 }
 
-bool KZUtils::GetFileMD5(const char *filePath, char *buffer, i32 size)
+bool SurfUtils::GetFileMD5(const char *filePath, char *buffer, i32 size)
 {
 	u8 chunk[8192];
 	FileHandle_t file = g_pFullFileSystem->OpenEx(filePath, "rb");
@@ -284,7 +284,7 @@ bool KZUtils::GetFileMD5(const char *filePath, char *buffer, i32 size)
 	}
 
 	// Try and get the MD5 for multifile vpks.
-	if (V_strlen(filePath) >= 4 && KZ_STREQI(filePath + V_strlen(filePath) - 4, ".vpk"))
+	if (V_strlen(filePath) >= 4 && SURF_STREQI(filePath + V_strlen(filePath) - 4, ".vpk"))
 	{
 		i32 index = 0;
 		CUtlString originalPath = filePath;
@@ -343,7 +343,7 @@ bool KZUtils::GetFileMD5(const char *filePath, char *buffer, i32 size)
 	return false;
 }
 
-CCSGameRules *KZUtils::GetGameRules()
+CCSGameRules *SurfUtils::GetGameRules()
 {
 	CCSGameRulesProxy *proxy = NULL;
 	proxy = (CCSGameRulesProxy *)utils::FindEntityByClassname(proxy, "cs_gamerules");
@@ -354,7 +354,7 @@ CCSGameRules *KZUtils::GetGameRules()
 	return nullptr;
 }
 
-u32 KZUtils::GetPlayerCount()
+u32 SurfUtils::GetPlayerCount()
 {
 	u32 count = 0;
 	auto clients = this->GetClientList();
@@ -373,7 +373,7 @@ u32 KZUtils::GetPlayerCount()
 	return count;
 }
 
-void KZUtils::AddTriangleOverlay(Vector const &p1, Vector const &p2, Vector const &p3, u8 r, u8 g, u8 b, u8 a, bool noDepthTest, f64 flDuration)
+void SurfUtils::AddTriangleOverlay(Vector const &p1, Vector const &p2, Vector const &p3, u8 r, u8 g, u8 b, u8 a, bool noDepthTest, f64 flDuration)
 {
 	void *debugoverlay = CALL_VIRTUAL(void *, g_pGameConfig->GetOffset("GetDebugOverlay"), interfaces::pServer);
 	if (debugoverlay)
@@ -382,7 +382,7 @@ void KZUtils::AddTriangleOverlay(Vector const &p1, Vector const &p2, Vector cons
 	}
 }
 
-void KZUtils::ClearOverlays()
+void SurfUtils::ClearOverlays()
 {
 	void *debugoverlay = CALL_VIRTUAL(void *, g_pGameConfig->GetOffset("GetDebugOverlay"), interfaces::pServer);
 	if (debugoverlay)

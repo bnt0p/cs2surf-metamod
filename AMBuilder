@@ -52,7 +52,7 @@ def configure_main(sdk_target, sdk, cxx):
     os.path.join(sdk['path'], 'tier1', 'generichash.cpp'),
     os.path.join(sdk['path'], 'tier1', 'keyvalues3.cpp'),
 
-    os.path.join(builder.sourcePath, 'src', 'cs2kz.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'cs2surf.cpp'),
 
     os.path.join(builder.sourcePath, 'src', 'utils', 'utils.cpp'),
     os.path.join(builder.sourcePath, 'src', 'utils', 'utils_interface.cpp'),
@@ -72,79 +72,71 @@ def configure_main(sdk_target, sdk, cxx):
     os.path.join(builder.sourcePath, 'src', 'movement', 'mv_manager.cpp'),
     os.path.join(builder.sourcePath, 'src', 'movement', 'mv_player.cpp'),
     
-    os.path.join(builder.sourcePath, 'src', 'kz', 'misc', 'kz_misc.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'misc', 'block_radio.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'misc', 'time_limit.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'misc', 'surf_misc.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'misc', 'block_radio.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'misc', 'time_limit.cpp'),
     
 
-    os.path.join(builder.sourcePath, 'src', 'kz', 'kz_manager.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'kz_player.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'kz_player_print.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'surf_manager.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'surf_player.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'surf_player_print.cpp'),
 
-    os.path.join(builder.sourcePath, 'src', 'kz', 'anticheat', 'kz_anticheat.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'beam', 'kz_beam.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'checkpoint', 'kz_checkpoint.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'checkpoint', 'commands.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'anticheat', 'surf_anticheat.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'beam', 'surf_beam.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'checkpoint', 'surf_checkpoint.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'checkpoint', 'commands.cpp'),
     
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'kz_db.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'find_courses.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'find_pb.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'find_player.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'find_records.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'migrations.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'save_prefs.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'save_time.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'setup_client.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'setup_database.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'setup_map_courses.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'setup_map.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'setup_modes.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'db', 'setup_styles.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'surf_db.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'find_courses.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'find_pb.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'find_player.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'find_records.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'migrations.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'save_prefs.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'save_time.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'setup_client.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'setup_database.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'setup_map_courses.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'setup_map.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'setup_modes.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'db', 'setup_styles.cpp'),
 
-    os.path.join(builder.sourcePath, 'src', 'kz', 'global', 'kz_global.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'global', 'commands.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'global', 'enforcer.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'global', 'api.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'global', 'handshake.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'global', 'events.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'global', 'surf_global.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'global', 'commands.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'global', 'enforcer.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'global', 'api.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'global', 'handshake.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'global', 'events.cpp'),
     
-    os.path.join(builder.sourcePath, 'src', 'kz', 'hud', 'kz_hud.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'hud', 'surf_hud.cpp'),
 
-    os.path.join(builder.sourcePath, 'src', 'kz', 'jumpstats', 'kz_jumpstats.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'jumpstats', 'jump_reporting.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'jumpstats', 'recorder.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'language', 'surf_language.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'mode', 'surf_mode_manager.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'mode', 'surf_mode_64t.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'noclip', 'surf_noclip.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'option', 'surf_option.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'profile', 'surf_profile.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'quiet', 'surf_quiet.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'replays', 'surf_replays.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'spec', 'surf_spec.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'goto', 'surf_goto.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'style', 'surf_style_manager.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'telemetry', 'surf_telemetry.cpp'),
+    
+    os.path.join(builder.sourcePath, 'src', 'surf', 'timer', 'surf_timer.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'timer', 'announce.cpp'),
 
-    os.path.join(builder.sourcePath, 'src', 'kz', 'language', 'kz_language.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'measure', 'kz_measure.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'mode', 'kz_mode_manager.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'mode', 'kz_mode_vnl.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'noclip', 'kz_noclip.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'option', 'kz_option.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'pistol', 'kz_pistol.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'profile', 'kz_profile.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'quiet', 'kz_quiet.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'racing', 'kz_racing.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'replays', 'kz_replays.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'saveloc', 'kz_saveloc.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'spec', 'kz_spec.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'goto', 'kz_goto.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'style', 'kz_style_manager.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'telemetry', 'kz_telemetry.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'timer', 'queries', 'base_request.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'timer', 'queries', 'course_top.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'timer', 'queries', 'top_record.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'timer', 'queries', 'personal_best.cpp'),
     
-    os.path.join(builder.sourcePath, 'src', 'kz', 'timer', 'kz_timer.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'timer', 'announce.cpp'),
-
-    os.path.join(builder.sourcePath, 'src', 'kz', 'timer', 'queries', 'base_request.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'timer', 'queries', 'course_top.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'timer', 'queries', 'top_record.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'timer', 'queries', 'personal_best.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'tip', 'surf_tip.cpp'),
     
-    os.path.join(builder.sourcePath, 'src', 'kz', 'tip', 'kz_tip.cpp'),
-    
-    os.path.join(builder.sourcePath, 'src', 'kz', 'mappingapi', 'kz_mappingapi.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'trigger', 'callbacks.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'trigger', 'kz_trigger.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'trigger', 'mapping_api.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'mappingapi', 'surf_mappingapi.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'trigger', 'callbacks.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'trigger', 'surf_trigger.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'trigger', 'mapping_api.cpp'),
   ]
 
 
@@ -186,86 +178,46 @@ def configure_main(sdk_target, sdk, cxx):
 
   return binary
 
-def configure_ckz(sdk, cxx):
-  ckz_binary = MMSPlugin.HL2Library(builder, cxx, f"{MMSPlugin.metadata['name']}-mode-ckz", sdk)
+def configure_lg(sdk, cxx):
+  lg_binary = MMSPlugin.HL2Library(builder, cxx, f"{MMSPlugin.metadata['name']}-style-lowgrav", sdk)
 
-  if ckz_binary.compiler.family == 'gcc' or ckz_binary.compiler.family == 'clang':
-    ckz_binary.compiler.defines += ['_GLIBCXX_USE_CXX11_ABI=0']
+  if lg_binary.compiler.family == 'gcc' or lg_binary.compiler.family == 'clang':
+    lg_binary.compiler.defines += ['_GLIBCXX_USE_CXX11_ABI=0']
 
-  if ckz_binary.compiler.family == 'clang':
-    ckz_binary.compiler.cxxflags += ['-Wno-register', '-frtti', '-Wno-invalid-offsetof', '-Wno-parentheses']
+  if lg_binary.compiler.family == 'clang':
+    lg_binary.compiler.cxxflags += ['-Wno-register', '-frtti', '-Wno-invalid-offsetof', '-Wno-parentheses']
 
-  ckz_binary.compiler.cxxincludes += [
+  lg_binary.compiler.cxxincludes += [
       os.path.join(builder.sourcePath, 'src'),
       os.path.join(builder.sourcePath, 'hl2sdk-cs2'),
       os.path.join(builder.sourcePath, 'hl2sdk-cs2', 'public', 'entity2'),
       os.path.join(builder.sourcePath, 'hl2sdk-cs2', 'game', 'server'),
   ]
 
-  if ckz_binary.compiler.target.platform == 'linux':
-    ckz_binary.compiler.postlink += [
+  if lg_binary.compiler.target.platform == 'linux':
+    lg_binary.compiler.postlink += [
       os.path.join(sdk['path'], 'lib', 'linux64', 'mathlib.a'),
     ] 
-    ckz_binary.sources += [
+    lg_binary.sources += [
       'src/utils/plat_linux.cpp'
       ]
-  elif ckz_binary.compiler.target.platform == 'windows':
-    ckz_binary.compiler.postlink += [
+  elif lg_binary.compiler.target.platform == 'windows':
+    lg_binary.compiler.postlink += [
       os.path.join(sdk['path'], 'lib', 'public', 'win64', 'mathlib.lib'),
     ]
-    ckz_binary.sources += [
+    lg_binary.sources += [
       'src/utils/plat_win.cpp'
       ]
 
-  ckz_binary.sources += [
+  lg_binary.sources += [
     os.path.join(sdk['path'], 'entity2', 'entityidentity.cpp'),
     os.path.join(sdk['path'], 'entity2', 'entitysystem.cpp'),
     os.path.join(builder.sourcePath, 'src', 'utils', 'schema.cpp'),
     os.path.join(builder.sourcePath, 'src', 'utils', 'gameconfig.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'mode', 'kz_mode_ckz.cpp'),
-  ]
-  return ckz_binary
-  
-def configure_abh(sdk, cxx):
-  abh_binary = MMSPlugin.HL2Library(builder, cxx, f"{MMSPlugin.metadata['name']}-style-autobhop", sdk)
-
-  if abh_binary.compiler.family == 'gcc' or abh_binary.compiler.family == 'clang':
-    abh_binary.compiler.defines += ['_GLIBCXX_USE_CXX11_ABI=0']
-
-  if abh_binary.compiler.family == 'clang':
-    abh_binary.compiler.cxxflags += ['-Wno-register', '-frtti', '-Wno-invalid-offsetof', '-Wno-parentheses']
-
-  abh_binary.compiler.cxxincludes += [
-      os.path.join(builder.sourcePath, 'src'),
-      os.path.join(builder.sourcePath, 'hl2sdk-cs2'),
-      os.path.join(builder.sourcePath, 'hl2sdk-cs2', 'public', 'entity2'),
-      os.path.join(builder.sourcePath, 'hl2sdk-cs2', 'game', 'server'),
-  ]
-
-  if abh_binary.compiler.target.platform == 'linux':
-    abh_binary.compiler.postlink += [
-      os.path.join(sdk['path'], 'lib', 'linux64', 'mathlib.a'),
-    ] 
-    abh_binary.sources += [
-      'src/utils/plat_linux.cpp'
-      ]
-  elif abh_binary.compiler.target.platform == 'windows':
-    abh_binary.compiler.postlink += [
-      os.path.join(sdk['path'], 'lib', 'public', 'win64', 'mathlib.lib'),
-    ]
-    abh_binary.sources += [
-      'src/utils/plat_win.cpp'
-      ]
-
-  abh_binary.sources += [
-    os.path.join(sdk['path'], 'entity2', 'entityidentity.cpp'),
-    os.path.join(sdk['path'], 'entity2', 'entitysystem.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'utils', 'schema.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'utils', 'gameconfig.cpp'),
-    os.path.join(builder.sourcePath, 'src', 'kz', 'style', 'kz_style_autobhop.cpp'),
+    os.path.join(builder.sourcePath, 'src', 'surf', 'style', 'surf_style_lowgrav.cpp'),
   ]
   
-  return abh_binary
+  return lg_binary
 
 sdk_target = MMSPlugin.sdk_target
 sdk = MMSPlugin.sdk_target.sdk
@@ -274,30 +226,30 @@ cxx = MMSPlugin.sdk_target.cxx
 # Main binary
 binary = configure_main(sdk_target, sdk, cxx)
 # Mode binaries
-ckz_binary = configure_ckz(sdk, cxx)
+# 64t_binary = configure_64t(sdk, cxx)
 # Style binaries
-abh_binary = configure_abh(sdk, cxx)
+lg_binary = configure_lg(sdk, cxx)
 
 protoc_builder = get_proto_builder(builder, sdk_target, sdk)
 
 binary.custom = [protoc_builder]
-ckz_binary.custom = [protoc_builder]
-abh_binary.custom = [protoc_builder]
+#64t_binary.custom = [protoc_builder]
+lg_binary.custom = [protoc_builder]
 
 # We have to split nodes here because they will be put into different folders.
 nodes = builder.Add(binary)
-mode_nodes = builder.Add(ckz_binary)
-style_nodes = builder.Add(abh_binary)
+#mode_nodes = builder.Add(64t_binary)
+style_nodes = builder.Add(lg_binary)
 
 # If we are generating a VS project, make sure to add the modes in, and the build folder for linter.
 if builder.options.generator == 'vs':
-  binary.sources += ckz_binary.sources
-  binary.sources += abh_binary.sources
+  binary.sources += 64t_binary.sources
+  binary.sources += lg_binary.sources
   binary.compiler.cxxincludes += [os.path.join(builder.buildPath, MMSPlugin.plugin_name, f'{binary.compiler.target.platform}-{cxx.target.arch}')]
 
 
 MMSPlugin.binaries += [nodes]
-MMSPlugin.mode_binaries += [mode_nodes]
+#MMSPlugin.mode_binaries += [mode_nodes]
 MMSPlugin.style_binaries += [style_nodes]
 
 # vim: filetype=python expandtab shiftwidth=2 tabstop=8 textwidth=99

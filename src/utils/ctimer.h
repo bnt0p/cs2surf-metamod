@@ -54,6 +54,6 @@ template<typename... Args>
 CTimer<Args...> *StartTimer(typename CTimer<Args...>::Fn fn, Args... args, f64 initialDelay, bool preserveMapChange = true, bool useRealTime = false)
 {
 	auto timer = new CTimer<Args...>(useRealTime, initialDelay, fn, args...);
-	g_pKZUtils->AddTimer(timer, preserveMapChange);
+	g_pSurfUtils->AddTimer(timer, preserveMapChange);
 	return timer;
 }

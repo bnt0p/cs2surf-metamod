@@ -8,7 +8,7 @@ static_function void ProcessTimerList(CUtlVector<CTimerBase *> &timers)
 	for (int i = timers.Count() - 1; i >= 0; i--)
 	{
 		auto timer = timers[i];
-		f64 currentTime = timer->useRealTime ? g_pKZUtils->GetGlobals()->realtime : g_pKZUtils->GetGlobals()->curtime;
+		f64 currentTime = timer->useRealTime ? g_pSurfUtils->GetGlobals()->realtime : g_pSurfUtils->GetGlobals()->curtime;
 		if (timer->lastExecute == -1)
 		{
 			timer->lastExecute = currentTime;

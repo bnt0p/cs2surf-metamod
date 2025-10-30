@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "cdetour.h"
 #include "detours.h"
-#include "kz/kz.h"
+#include "surf/surf.h"
 #include "sdk/entity/ccsplayerpawn.h"
 #include "movement/movement.h"
 #include "fmtstr.h"
@@ -82,10 +82,10 @@ bool Detour_TraceShape(const void *physicsQuery, const Ray_t &ray, const Vector 
 	Vector velocity;
 	for (u32 i = 0; i < 2; i++)
 	{
-		if (g_pKZPlayerManager->ToPlayer(i) && g_pKZPlayerManager->ToPlayer(i)->GetMoveServices())
+		if (g_pSurfPlayerManager->ToPlayer(i) && g_pSurfPlayerManager->ToPlayer(i)->GetMoveServices())
 		{
-			error = g_pKZPlayerManager->ToPlayer(i)->GetMoveServices()->m_flAccumulatedJumpError();
-			velocity = g_pKZPlayerManager->ToPlayer(i)->currentMoveData->m_vecVelocity;
+			error = g_pSurfPlayerManager->ToPlayer(i)->GetMoveServices()->m_flAccumulatedJumpError();
+			velocity = g_pSurfPlayerManager->ToPlayer(i)->currentMoveData->m_vecVelocity;
 			break;
 		}
 	}
@@ -139,5 +139,5 @@ bool Detour_TraceShape(const void *physicsQuery, const Ray_t &ray, const Vector 
 void Detour_CPhysicsGameSystemFrameBoundary(void *pThis)
 {
 	CPhysicsGameSystemFrameBoundary(pThis);
-	KZ::misc::OnPhysicsGameSystemFrameBoundary(pThis);
+	Surf::misc::OnPhysicsGameSystemFrameBoundary(pThis);
 }

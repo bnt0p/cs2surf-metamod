@@ -4,7 +4,7 @@
 #include "sdk/datatypes.h"
 #include "igameevents.h"
 
-class KZUtils;
+class SurfUtils;
 class CBasePlayerController;
 
 namespace utils
@@ -120,6 +120,6 @@ namespace utils
 	template<typename T = CBaseEntity>
 	T *CreateEntityByName(const char *className)
 	{
-		return reinterpret_cast<T *>(g_pKZUtils->CreateEntityByName(className, -1));
+		return reinterpret_cast<T *>(g_pSurfUtils->CreateEntityByName(className, -1));
 	}
 } // namespace utils
