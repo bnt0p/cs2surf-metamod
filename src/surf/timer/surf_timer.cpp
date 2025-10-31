@@ -265,6 +265,7 @@ bool SurfTimerService::TimerEnd(const SurfCourseDescriptor *courseDesc)
 	}
 
 	f32 time = this->GetTime() + g_pSurfUtils->GetServerGlobals()->frametime;
+	u32 teleportsUsed = this->player->checkpointService->GetTeleportCount();
 
 	bool allowEnd = true;
 	FOR_EACH_VEC(eventListeners, i)
@@ -457,6 +458,12 @@ void SurfTimerService::FormatTime(f64 time, char *output, u32 length, bool preci
 			snprintf(output, length, "%i:%02i:%02i", hours, minutes, seconds);
 		}
 	}
+}
+
+static_function std::string GetTeleportCountText(int tpCount, const char *language)
+{
+	return tpCount == 1 ? SurfLanguageService::PrepareMessageWithLang(language, "1 Teleport Text")
+						: SurfLanguageService::PrepareMessageWithLang(language, "2+ Teleports Text", tpCount);
 }
 
 void SurfTimerService::Pause()
@@ -991,14 +998,14 @@ void SurfTimerService::UpdateLocalRecordCache()
 				{
 					continue;
 				}
-				SurfTimerService::InsertRecordToCache(result->GetFloat(0), course, modeInfo.id, true, false, result->GetString(3));
+				SurfTimerService::InsertRecordToCache(result->GetFloat(0), course, modeInfo.id, false, result->GetString(3));
 			}
 		}
 	};
 	SurfDatabaseService::QueryAllRecords(g_pSurfUtils->GetCurrentMapName(), onQuerySuccess, SurfDatabaseService::OnGenericTxnFailure);
 }
 
-void SurfTimerService::InsertRecordToCache(f64 time, const SurfCourseDescriptor *course, PluginId modeID, bool overall, bool global, CUtlString metadata)
+void SurfTimerService::InsertRecordToCache(f64 time, const SurfCourseDescriptor *course, PluginId modeID, bool global, CUtlString metadata)
 {
 	PBData &pb = global ? SurfTimerService::wrCache[ToPBDataKey(modeID, course->guid)] : SurfTimerService::srCache[ToPBDataKey(modeID, course->guid)];
 
@@ -1079,7 +1086,7 @@ const PBData *SurfTimerService::GetGlobalCachedPB(const SurfCourseDescriptor *co
 	return &this->globalPBCache[key];
 }
 
-void SurfTimerService::InsertPBToCache(f64 time, const SurfCourseDescriptor *course, PluginId modeID, bool overall, bool global, CUtlString metadata,
+void SurfTimerService::InsertPBToCache(f64 time, const SurfCourseDescriptor *course, PluginId modeID, bool global, CUtlString metadata,
 									 f64 points)
 {
 	PBData &pb = global ? this->globalPBCache[ToPBDataKey(modeID, course->guid)] : this->localPBCache[ToPBDataKey(modeID, course->guid)];
@@ -1149,7 +1156,7 @@ void SurfTimerService::CheckMissedTime()
 {
 	const SurfCourseDescriptor *course = this->GetCourse();
 	// No active course, the timer is not running or if we already announce late PBs.
-	if (!course || !this->GetTimerRunning() || (!this->shouldAnnounceMissedTime))
+	if (!course || !this->GetTimerRunning() || !this->shouldAnnounceMissedTime)
 	{
 		return;
 	}
@@ -1379,25 +1386,7 @@ void SurfTimerService::UpdateLocalPBCache()
 				{
 					continue;
 				}
-				pl->timerService->InsertPBToCache(result->GetFloat(0), course, modeInfo.id, true, false, result->GetString(3));
-			}
-		}
-		result = queries[1]->GetResultSet();
-		if (result && result->GetRowCount() > 0)
-		{
-			while (result->FetchRow())
-			{
-				auto modeInfo = Surf::mode::GetModeInfoFromDatabaseID(result->GetInt(2));
-				if (modeInfo.databaseID < 0)
-				{
-					continue;
-				}
-				const SurfCourseDescriptor *course = Surf::course::GetCourseByLocalCourseID(result->GetInt(1));
-				if (!course)
-				{
-					continue;
-				}
-				pl->timerService->InsertPBToCache(result->GetFloat(0), course, modeInfo.id, false, false, result->GetString(3));
+				pl->timerService->InsertPBToCache(result->GetFloat(0), course, modeInfo.id, false, result->GetString(3));
 			}
 		}
 	};

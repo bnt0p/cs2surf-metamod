@@ -16,9 +16,9 @@ bool Surf::API::DecodeModeString(std::string_view modeString, Mode &mode)
 
 bool Surf::API::DecodeStyleString(std::string_view styleString, Style &style)
 {
-	if (SURF_STREQI(styleString.data(), "auto-bhop") || SURF_STREQI(styleString.data(), "abh"))
+	if (SURF_STREQI(styleString.data(), "lowgrav") || SURF_STREQI(styleString.data(), "lg"))
 	{
-		style = Style::AutoBhop;
+		style = Style::LowGrav;
 		return true;
 	}
 	else

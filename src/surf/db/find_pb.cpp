@@ -47,7 +47,6 @@ void SurfDatabaseService::QueryAllPBs(u64 steamID64, CUtlString mapName, Transac
 									TransactionFailureCallbackFunc onFailure)
 {
 	std::string cleanedMapName = SurfDatabaseService::GetDatabaseConnection()->Escape(mapName.Get());
-
 	Transaction txn;
 
 	char query[1024];

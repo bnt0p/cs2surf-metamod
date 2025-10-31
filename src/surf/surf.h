@@ -15,7 +15,7 @@
 #define SURF_SND_RESET_CPS "UIPanorama.round_report_odds_dn"
 
 #define SURF_WORKSHOP_ADDON_ID            "3469155349"
-#define SURF_WORKSHOP_ADDON_SNDEVENT_FILE "soundevents/soundevents_cs2surf.vsndevts"
+#define SURF_WORKSHOP_ADDON_SNDEVENT_FILE "soundevents/soundevents_cs2kz.vsndevts"
 
 #define SURF_DEFAULT_CHAT_PREFIX  "{lime}Surf {grey}|{default}"
 #define SURF_DEFAULT_TIP_INTERVAL 75.0
@@ -155,7 +155,6 @@ public:
 	SurfTipService *tipService {};
 	SurfTriggerService *triggerService {};
 
-	void DisableTurnbinds();
 	void EnableGodMode();
 
 	// Leg stuff

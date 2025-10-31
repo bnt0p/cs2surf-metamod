@@ -20,7 +20,7 @@ namespace Surf::API
 
 	enum class Style : u8
 	{
-		AutoBhop = 1,
+		LowGrav = 1,
 	};
 
 	bool DecodeStyleString(std::string_view styleString, Style &style);

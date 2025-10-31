@@ -158,7 +158,7 @@ public:
 			f32 pbDiff {};
 			u32 rank {};
 			u32 maxRank {};
-		} overall;
+		} overall, pro;
 	} localResponse;
 
 	// Submit the run locally, update the cache if needed.

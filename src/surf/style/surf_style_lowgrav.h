@@ -1,7 +1,7 @@
 #include "surf_style.h"
 #include "version_gen.h"
 
-#define STYLE_NAME       "Low Grav"
+#define STYLE_NAME       "LowGrav"
 #define STYLE_NAME_SHORT "LG"
 
 class SurfLowGravStylePlugin : public ISmmPlugin, public IMetamodListener
@@ -61,7 +61,7 @@ class SurfLowGravStyleService : public SurfStyleService
 public:
 	virtual const char *GetStyleName() override
 	{
-		return "Low Grav";
+		return "LowGrav";
 	}
 
 	virtual const char *GetStyleShortName() override

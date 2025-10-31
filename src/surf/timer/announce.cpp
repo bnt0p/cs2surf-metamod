@@ -217,7 +217,7 @@ void RecordAnnounce::UpdateGlobalCache()
 
 			if (this->time < this->oldGPB.overall.time)
 			{
-				player->timerService->InsertPBToCache(this->time, course, mode.id, true, true, this->metadata.c_str(),
+				player->timerService->InsertPBToCache(this->time, course, mode.id, true, this->metadata.c_str(),
 													  this->globalResponse.overall.points);
 			}
 		}

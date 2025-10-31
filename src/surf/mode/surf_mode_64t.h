@@ -18,56 +18,6 @@
 
 #define SPEED_NORMAL 260.0f
 
-class Surf64tModePlugin : public ISmmPlugin, public IMetamodListener
-{
-public:
-	bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late);
-	bool Unload(char *error, size_t maxlen);
-	bool Pause(char *error, size_t maxlen);
-	bool Unpause(char *error, size_t maxlen);
-
-public:
-	const char *GetAuthor()
-	{
-		return PLUGIN_AUTHOR;
-	}
-
-	const char *GetName()
-	{
-		return "CS2Surf-Mode-64tick";
-	}
-
-	const char *GetDescription()
-	{
-		return "64tick mode plugin for CS2Surf";
-	}
-
-	const char *GetURL()
-	{
-		return PLUGIN_URL;
-	}
-
-	const char *GetLicense()
-	{
-		return PLUGIN_LICENSE;
-	}
-
-	const char *GetVersion()
-	{
-		return PLUGIN_FULL_VERSION;
-	}
-
-	const char *GetDate()
-	{
-		return __DATE__;
-	}
-
-	const char *GetLogTag()
-	{
-		return PLUGIN_LOGTAG;
-	}
-};
-
 class Surf64tModeService : public SurfModeService
 {
 	using SurfModeService::SurfModeService;

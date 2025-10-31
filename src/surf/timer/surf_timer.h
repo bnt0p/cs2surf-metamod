@@ -165,13 +165,13 @@ private:
 public:
 	static void ClearRecordCache();
 	static void UpdateLocalRecordCache();
-	static void InsertRecordToCache(f64 time, const SurfCourseDescriptor *courseName, PluginId modeID, bool hasTeleports, bool global,
+	static void InsertRecordToCache(f64 time, const SurfCourseDescriptor *courseName, PluginId modeID, bool global,
 									CUtlString metadata = "");
 
 	void ClearPBCache();
 	const PBData *GetGlobalCachedPB(const SurfCourseDescriptor *course, PluginId modeID);
 	void UpdateLocalPBCache();
-	void InsertPBToCache(f64 time, const SurfCourseDescriptor *courseName, PluginId modeID, bool overall, bool global, CUtlString metadata = "",
+	void InsertPBToCache(f64 time, const SurfCourseDescriptor *courseName, PluginId modeID, bool global, CUtlString metadata = "",
 						 f64 points = 0);
 	void SetCompareTarget(const char *typeString);
 

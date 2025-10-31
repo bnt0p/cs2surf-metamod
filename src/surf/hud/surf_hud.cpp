@@ -8,7 +8,6 @@
 #include "surf/option/surf_option.h"
 #include "surf/timer/surf_timer.h"
 #include "surf/language/surf_language.h"
-#include "surf/checkpoint/surf_checkpoint.h"
 
 #include "tier0/memdbgon.h"
 
@@ -74,19 +73,6 @@ std::string SurfHUDService::GetKeyText(const char *language)
 	// clang-format on
 }
 
-std::string SurfHUDService::GetCheckpointText(const char *language)
-{
-	// clang-format off
-
-	return SurfLanguageService::PrepareMessageWithLang(language, "HUD - Checkpoint Text",
-		this->player->checkpointService->GetCurrentCpIndex(),
-		this->player->checkpointService->GetCheckpointCount(),
-		this->player->checkpointService->GetTeleportCount()
-	);
-
-	// clang-format on
-}
-
 std::string SurfHUDService::GetTimerText(const char *language)
 {
 	if (this->player->timerService->GetTimerRunning() || this->ShouldShowTimerAfterStop())
@@ -120,17 +106,16 @@ void SurfHUDService::DrawPanels(SurfPlayer *player, SurfPlayer *target)
 	const char *language = target->languageService->GetLanguage();
 
 	std::string keyText = player->hudService->GetKeyText(language);
-	std::string checkpointText = player->hudService->GetCheckpointText(language);
 	std::string timerText = player->hudService->GetTimerText(language);
 	std::string speedText = player->hudService->GetSpeedText(language);
 
 	// clang-format off
 	std::string centerText = SurfLanguageService::PrepareMessageWithLang(language, "HUD - Center Text", 
-		keyText.c_str(), checkpointText.c_str(), timerText.c_str(), speedText.c_str());
+		keyText.c_str(), timerText.c_str(), speedText.c_str());
 	std::string alertText = SurfLanguageService::PrepareMessageWithLang(language, "HUD - Alert Text", 
-		keyText.c_str(), checkpointText.c_str(), timerText.c_str(), speedText.c_str());
+		keyText.c_str(), timerText.c_str(), speedText.c_str());
 	std::string htmlText = SurfLanguageService::PrepareMessageWithLang(language, "HUD - Html Center Text",
-		keyText.c_str(), checkpointText.c_str(), timerText.c_str(), speedText.c_str());
+		keyText.c_str(), timerText.c_str(), speedText.c_str());
 
 	// clang-format on
 

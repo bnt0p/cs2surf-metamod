@@ -14,15 +14,14 @@ enum
 	SCFL_MODESTYLE = 1 << 2,
 	SCFL_PREFERENCE = 1 << 3,
 	SCFL_REPLAY = 1 << 4,
-	SCFL_SAVELOC = 1 << 5,
-	SCFL_SPEC = 1 << 6,
-	SCFL_STATUS = 1 << 7,
-	SCFL_TIMER = 1 << 8,
-	SCFL_PLAYER = 1 << 9,
-	SCFL_GLOBAL = 1 << 10,
-	SCFL_MISC = 1 << 11,
-	SCFL_MAP = 1 << 12,
-	SCFL_HUD = 1 << 13
+	SCFL_SPEC = 1 << 5,
+	SCFL_STATUS = 1 << 6,
+	SCFL_TIMER = 1 << 7,
+	SCFL_PLAYER = 1 << 8,
+	SCFL_GLOBAL = 1 << 9,
+	SCFL_MISC = 1 << 10,
+	SCFL_MAP = 1 << 11,
+	SCFL_HUD = 1 << 12
 };
 
 #define SCMD_CALLBACK(name) META_RES name(CCSPlayerController *controller, const CCommand *args)

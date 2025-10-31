@@ -94,7 +94,7 @@ void SurfProfileService::RequestRating()
 		return;
 	}
 	this->timeToNextRatingRefresh = g_pSurfUtils->GetServerGlobals()->realtime + RATING_REFRESH_PERIOD + RandomFloat(-30.0f, 30.0f);
-	std::string url = std::string(SurfOptionService::GetOptionStr("apiUrl", "https://api.placeholder.org")) + "/players/" + std::to_string(steamID64)
+	std::string url = std::string(SurfOptionService::GetOptionStr("apiUrl", "https://api.cs2kz.org")) + "/players/" + std::to_string(steamID64)
 					  + "/profile?mode=" + std::to_string(static_cast<u8>(mode));
 	HTTP::Request request(HTTP::Method::GET, url);
 	auto callback = [steamID64, mode](HTTP::Response response)

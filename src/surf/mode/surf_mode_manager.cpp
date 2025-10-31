@@ -195,7 +195,7 @@ bool SurfModeManager::RegisterMode(PluginId id, const char *shortModeName, const
 
 void SurfModeManager::UnregisterMode(PluginId id)
 {
-	// Cannot unregister VNL.
+	// Cannot unregister 64t.
 	if (id = g_PLID)
 	{
 		return;
@@ -215,7 +215,7 @@ void SurfModeManager::UnregisterMode(PluginId id)
 				if (!V_strcmp(player->modeService->GetModeName(), modeInfos[i].longModeName)
 					|| !V_strcmp(player->modeService->GetModeShortName(), modeInfos[i].shortModeName))
 				{
-					this->SwitchToMode(player, "VNL");
+					this->SwitchToMode(player, "64t");
 				}
 			}
 

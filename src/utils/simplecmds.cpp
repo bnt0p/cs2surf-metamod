@@ -25,13 +25,9 @@ struct Scmd
 const char* cmdFlagNames[] = {
 	"Checkpoint",
 	"Record",
-	"Jumpstats",
-	"Measure",
 	"ModeStyle",
 	"Preference",
-	"Racing",
 	"Replay",
-	"Saveloc",
 	"Spec",
 	"Status",
 	"Timer",
