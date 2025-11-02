@@ -63,7 +63,7 @@ class Surf102tModeService : public SurfModeService
 		(float)10.0f,   // sv_accelerate
 		(bool)false,    // sv_accelerate_use_weapon_speed
 		(float)150.0f,  // sv_airaccelerate
-		(float)43.55f,   // sv_air_max_wishspeed
+		(float)43.55f,  // sv_air_max_wishspeed
 		(bool)true,     // sv_autobunnyhopping
 		(float)0.0f,    // sv_bounce
 		(bool)true,     // sv_enablebunnyhopping

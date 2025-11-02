@@ -237,7 +237,7 @@ public:
 	// Other events
 	void OnTeleport(const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity);
 
-	void ClipVelocity(Vector &in, Vector &normal, Vector &out); 
+	void ClipVelocity(Vector &in, Vector &normal, Vector &out);
 
 	bool IsValidMovementTrace(trace_t &tr, bbox_t bounds, CTraceFilterPlayerMovementCS *filter);
 
