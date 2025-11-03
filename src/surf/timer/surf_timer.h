@@ -205,6 +205,11 @@ public:
 		return currentTime;
 	}
 
+	i32 GetStage()
+	{
+		return currentStage;
+	}
+
 	static void FormatTime(f64 time, char *output, u32 length, bool precise = true);
 
 	static CUtlString FormatTime(f64 time, bool precise = true)

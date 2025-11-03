@@ -143,6 +143,74 @@ SCMD(surf_end, SCFL_MAP)
 	return MRES_SUPERCEDE;
 }
 
+SCMD(surf_rs, SCFL_TIMER | SCFL_MAP)
+{
+	SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(controller);
+	int currentStage = player->timerService->GetStage();
+	if (currentStage == 0)
+	{
+		return MRES_SUPERCEDE;
+	}
+
+	// First pass: Find all teleport destinations and their positions
+	std::vector<std::pair<Vector, QAngle>> teleportDestinations;
+	EntityInstanceIter_t iter;
+	int destCount = 0;
+	for (CEntityInstance *pEnt = iter.First(); pEnt; pEnt = iter.Next())
+	{
+		if (V_strstr(pEnt->GetClassname(), "info_teleport_destination"))
+		{
+			CBaseEntity *pEntity = static_cast<CBaseEntity *>(pEnt);
+			const SurfTrigger *surfTrigger = Surf::mapapi::GetSurfDestination(pEntity);
+
+			if (surfTrigger)
+			{
+				teleportDestinations.push_back({surfTrigger->origin, surfTrigger->rotation});
+			}
+		}
+	}
+
+	// Second pass: Find stage triggers and check if any teleport destinations are inside
+	EntityInstanceIter_t iter2;
+	for (CEntityInstance *pEnt = iter2.First(); pEnt; pEnt = iter2.Next())
+	{
+		if (V_strstr(pEnt->GetClassname(), "trigger_multiple"))
+		{
+			CBaseTrigger *pTrigger = static_cast<CBaseTrigger *>(pEnt);
+			const SurfTrigger *surfTrigger = Surf::mapapi::GetSurfTrigger(pTrigger);
+
+			if (!surfTrigger)
+			{
+				continue;
+			}
+
+			if (surfTrigger->zone.number == currentStage)
+			{
+				Vector mins = surfTrigger->mins + surfTrigger->origin;
+				Vector maxs = surfTrigger->maxs + surfTrigger->origin;
+
+				for (const auto &[destPos, destAng] : teleportDestinations)
+				{
+					if (utils::IsVectorInBox(destPos, mins, maxs))
+					{
+						player->Teleport(&destPos, &destAng, &vec3_origin);
+						return MRES_SUPERCEDE;
+					}
+				}
+
+				// Fallback: if no teleport destination found, use center of trigger
+				Vector center = (mins + maxs) * 0.5f;
+				float zoneHeight = maxs.z - mins.z;
+				center.z = mins.z + (zoneHeight * 0.15f);
+				player->SetOrigin(center);
+				return MRES_SUPERCEDE;
+			}
+		}
+	}
+
+	return MRES_SUPERCEDE;
+}
+
 SCMD(surf_restart, SCFL_TIMER | SCFL_MAP)
 {
 	SurfPlayer *player = g_pSurfPlayerManager->ToPlayer(controller);
@@ -504,6 +572,7 @@ CConVar<Color> surf_trigger_multiple_colors[SURFTRIGGER_COUNT] =
 	{"surf_trigger_mappingapi_checkpoint_zone_color", FCVAR_NONE, "Color of Mapping API's Checkpoint Zone trigger (rgba) drawn by surf_showtriggers.", Color(219, 255, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_stage_zone_color", FCVAR_NONE, "Color of Mapping API's Stage Zone trigger (rgba) drawn by surf_showtriggers.", Color(255, 157, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_general_teleport_color", FCVAR_NONE, "Color of Mapping API's General Teleport trigger (rgba) drawn by surf_showtriggers.", Color(230, 117, 255, 0x80), OnDebugColorCvarChanged},
+	{"surf_trigger_mappingapi_destination_color", FCVAR_NONE, "Color of Mapping API's Teleport Destination trigger (rgba) drawn by surf_showtriggers.", Color(230, 117, 255, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_multi_bhop_color", FCVAR_NONE, "Color of Mapping API's Multi Bhop trigger (rgba) drawn by surf_showtriggers.", Color(79, 31, 255, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_single_bhop_color", FCVAR_NONE, "Color of Mapping API's Single Bhop trigger (rgba) drawn by surf_showtriggers.", Color(31, 107, 255, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_sequential_bhop_color", FCVAR_NONE, "Color of Mapping API's Sequential Bhop trigger (rgba) drawn by surf_showtriggers.", Color(196, 84, 214, 0x80), OnDebugColorCvarChanged},

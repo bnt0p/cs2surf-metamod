@@ -42,6 +42,8 @@ enum SurfTriggerType
 	SURFTRIGGER_SINGLE_BHOP,
 	SURFTRIGGER_SEQUENTIAL_BHOP,
 
+	SURFTRIGGER_DESTINATION,
+
 	SURFTRIGGER_PUSH,
 	SURFTRIGGER_COUNT,
 };
@@ -175,6 +177,8 @@ struct SurfTrigger
 	i32 hammerId;
 	Vector mins;
 	Vector maxs;
+	Vector origin;
+	QAngle rotation;
 
 	union
 	{
@@ -198,6 +202,7 @@ namespace Surf::mapapi
 	void CheckEndTimerTrigger(CBaseTrigger *trigger);
 	// This is const, unlike the trigger returned from Mapi_FindSurfTrigger.
 	const SurfTrigger *GetSurfTrigger(CBaseTrigger *trigger);
+	const SurfTrigger *GetSurfDestination(CBaseEntity *entity);
 
 	const SurfCourseDescriptor *GetCourseDescriptorFromTrigger(CBaseTrigger *trigger);
 	const SurfCourseDescriptor *GetCourseDescriptorFromTrigger(const SurfTrigger *trigger);

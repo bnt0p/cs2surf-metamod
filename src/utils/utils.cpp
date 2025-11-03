@@ -112,6 +112,11 @@ CBaseEntity *utils::FindEntityByClassname(CEntityInstance *start, const char *na
 	return static_cast<CBaseEntity *>(iter.Next());
 }
 
+bool utils::IsVectorInBox(const Vector &point, const Vector &mins, const Vector &maxs)
+{
+	return (point.x >= mins.x && point.x <= maxs.x && point.y >= mins.y && point.y <= maxs.y && point.z >= mins.z && point.z <= maxs.z);
+}
+
 void utils::UnlockConVars()
 {
 	if (!g_pCVar)

@@ -34,6 +34,9 @@ void SurfZoneBeamService::CreateZoneOutlineBeams(SurfTrigger *trigger, SurfZoneB
 	Vector mins = trigger->mins;
 	Vector maxs = trigger->maxs;
 
+	mins += trigger->origin;
+	maxs += trigger->origin;
+
 	Vector corners[8] = {Vector(mins.x, mins.y, mins.z), Vector(maxs.x, mins.y, mins.z), Vector(maxs.x, maxs.y, mins.z),
 						 Vector(mins.x, maxs.y, mins.z), Vector(mins.x, mins.y, maxs.z), Vector(maxs.x, mins.y, maxs.z),
 						 Vector(maxs.x, maxs.y, maxs.z), Vector(mins.x, maxs.y, maxs.z)};

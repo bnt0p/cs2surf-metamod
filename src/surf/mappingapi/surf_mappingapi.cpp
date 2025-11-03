@@ -291,26 +291,6 @@ static_function void Mapi_OnTriggerMultipleSpawn(const EntitySpawnInfo_t *info)
 			}
 		}
 		break;
-
-		case SURFTRIGGER_TELEPORT:
-		case SURFTRIGGER_MULTI_BHOP:
-		case SURFTRIGGER_SINGLE_BHOP:
-		case SURFTRIGGER_SEQUENTIAL_BHOP:
-		{
-			const char *destination = ekv->GetString("timer_teleport_destination");
-			V_snprintf(trigger.teleport.destination, sizeof(trigger.teleport.destination), "%s", destination);
-			trigger.teleport.delay = ekv->GetFloat("timer_teleport_delay", 0);
-			trigger.teleport.delay = MAX(trigger.teleport.delay, 0);
-			if (Surf::mapapi::IsBhopTrigger(type))
-			{
-				trigger.teleport.delay = MAX(trigger.teleport.delay, 0.1);
-			}
-			trigger.teleport.useDestinationAngles = ekv->GetBool("timer_teleport_use_dest_angles");
-			trigger.teleport.resetSpeed = ekv->GetBool("timer_teleport_reset_speed");
-			trigger.teleport.reorientPlayer = ekv->GetBool("timer_teleport_reorient_player");
-			trigger.teleport.relative = ekv->GetBool("timer_teleport_relative");
-		}
-		break;
 		case SURFTRIGGER_PUSH:
 		{
 			Vector impulse = ekv->GetVector("timer_push_amount");
@@ -369,7 +349,7 @@ static_function void Mapi_OnTriggerMultipleSpawn(const EntitySpawnInfo_t *info)
 					if (stageNum == 1)
 					{
 						trigger.type = SURFTRIGGER_ZONE_START;
-						trigger.zone.number = 0;
+						trigger.zone.number = 1;
 					}
 					else
 					{
@@ -460,6 +440,28 @@ static_function SurfTrigger *Mapi_FindSurfTrigger(CBaseTrigger *trigger)
 	return nullptr;
 }
 
+static_function SurfTrigger *Mapi_FindSurfDestination(CBaseEntity *entity)
+{
+	if (!entity || !entity->m_pEntity)
+	{
+		return nullptr;
+	}
+	CEntityHandle entityHandle = entity->GetRefEHandle();
+	if (!entityHandle.IsValid() || entity->m_pEntity->m_flags & EF_IS_INVALID_EHANDLE)
+	{
+		return nullptr;
+	}
+	int entityHammerId = atoi(entity->m_sUniqueHammerID.Get());
+	FOR_EACH_VEC(g_mappingApi.triggers, i)
+	{
+		if (g_mappingApi.triggers[i].type == SURFTRIGGER_DESTINATION && entityHandle == g_mappingApi.triggers[i].entity)
+		{
+			return &g_mappingApi.triggers[i];
+		}
+	}
+	return nullptr;
+}
+
 static_function SurfCourseDescriptor *Mapi_FindCourse(const char *targetname)
 {
 	SurfCourseDescriptor *result = nullptr;
@@ -495,34 +497,15 @@ static_function bool Mapi_SetStartPosition(const char *descriptorName, Vector or
 static_function void Mapi_OnInfoTeleportDestinationSpawn(const EntitySpawnInfo_t *info)
 {
 	const CEntityKeyValues *ekv = info->m_pKeyValues;
-	const char *targetname = ekv->GetString("targetname");
-	if (SURF_STREQI(targetname, "timer_start"))
-	{
-		if (g_mappingApi.mapApiVersion == SURF_NO_MAPAPI_VERSION)
-		{
-			Mapi_SetStartPosition(SURF_NO_MAPAPI_COURSE_DESCRIPTOR, ekv->GetVector("origin"), ekv->GetQAngle("angles"));
-		}
-		else if (g_mappingApi.mapApiVersion == SURF_MAPAPI_VERSION) // TODO do better check
-		{
-			const char *courseDescriptor = ekv->GetString("timer_zone_course_descriptor");
-			i32 hammerId = ekv->GetInt("hammerUniqueId", -1);
-			Vector origin = ekv->GetVector("origin");
-			if (!courseDescriptor || !courseDescriptor[0])
-			{
-				Mapi_Error("Course descriptor targetname of timer_start info_teleport_destination is empty! Hammer ID %i, origin (%.0f %.0f %.0f)",
-						   hammerId, origin.x, origin.y, origin.z);
-				assert(0);
-				return;
-			}
-			Mapi_SetStartPosition(courseDescriptor, origin, ekv->GetQAngle("angles"));
-		}
-	}
-	else if (SURF_STREQI(targetname, "timer_jumpstat_area"))
-	{
-		g_mappingApi.hasJumpstatArea = true;
-		g_mappingApi.jumpstatAreaPos = ekv->GetVector("origin");
-		g_mappingApi.jumpstatAreaAngles = ekv->GetQAngle("angles");
-	}
+	i32 hammerId = ekv->GetInt("hammerUniqueId", -1);
+
+	SurfTrigger trigger = {};
+	trigger.type = SURFTRIGGER_DESTINATION;
+	trigger.hammerId = hammerId;
+	trigger.entity = info->m_pEntity->GetRefEHandle();
+	snprintf(trigger.zone.courseDescriptor, sizeof(trigger.zone.courseDescriptor), SURF_NO_MAPAPI_COURSE_DESCRIPTOR);
+
+	g_mappingApi.triggers.AddToTail(trigger);
 };
 
 void Surf::mapapi::Init()
@@ -685,6 +668,21 @@ void Surf::mapapi::OnRoundStart()
 			SurfTrigger *trigger = &g_mappingApi.triggers[i];
 			if (!Surf::mapapi::IsTimerTrigger(trigger->type))
 			{
+				if (trigger->type == SURFTRIGGER_DESTINATION)
+				{
+					CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(trigger->entity.Get());
+					if (!pEntity)
+					{
+						continue;
+					}
+
+					Vector absOrigin = pEntity->m_CBodyComponent()->m_pSceneNode()->m_vecAbsOrigin();
+					QAngle absRotation = pEntity->m_CBodyComponent()->m_pSceneNode()->m_angAbsRotation();
+					trigger->origin = absOrigin;
+					trigger->rotation = absRotation;
+
+					continue;
+				}
 				continue;
 			}
 
@@ -697,13 +695,25 @@ void Surf::mapapi::OnRoundStart()
 			{
 				case SURFTRIGGER_ZONE_START:
 				case SURFTRIGGER_ZONE_END:
+				case SURFTRIGGER_ZONE_STAGE:
 				{
 					CBaseEntity *pEntity = reinterpret_cast<CBaseEntity *>(trigger->entity.Get());
 					Vector absOrigin = pEntity->m_CBodyComponent()->m_pSceneNode()->m_vecAbsOrigin();
+					QAngle absRotation = pEntity->m_CBodyComponent()->m_pSceneNode()->m_angRotation();
 					Vector mins = pEntity->m_pCollision()->m_vecMins();
 					Vector maxs = pEntity->m_pCollision()->m_vecMaxs();
-					trigger->mins = mins + absOrigin;
-					trigger->maxs = maxs + absOrigin;
+
+					trigger->mins = mins;
+					trigger->maxs = maxs;
+					trigger->origin = absOrigin;
+					trigger->rotation = absRotation;
+
+					if (trigger->type == SURFTRIGGER_ZONE_STAGE)
+					{
+						stageXor ^= (++stageCount) ^ trigger->zone.number;
+						break;
+					}
+
 					if (g_pSurfZoneBeamService)
 					{
 						g_pSurfZoneBeamService->AddZone(trigger);
@@ -715,9 +725,6 @@ void Surf::mapapi::OnRoundStart()
 					break;
 				case SURFTRIGGER_ZONE_CHECKPOINT:
 					cpXor ^= (++cpCount) ^ trigger->zone.number;
-					break;
-				case SURFTRIGGER_ZONE_STAGE:
-					stageXor ^= (++stageCount) ^ trigger->zone.number;
 					break;
 			}
 		}
@@ -782,6 +789,11 @@ void Surf::mapapi::CheckEndTimerTrigger(CBaseTrigger *trigger)
 const SurfTrigger *Surf::mapapi::GetSurfTrigger(CBaseTrigger *trigger)
 {
 	return Mapi_FindSurfTrigger(trigger);
+}
+
+const SurfTrigger *Surf::mapapi::GetSurfDestination(CBaseEntity *entity)
+{
+	return Mapi_FindSurfDestination(entity);
 }
 
 const SurfCourseDescriptor *Surf::mapapi::GetCourseDescriptorFromTrigger(CBaseTrigger *trigger)

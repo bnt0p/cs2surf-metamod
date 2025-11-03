@@ -44,6 +44,8 @@ namespace utils
 	// c can be PI (for radians) or 180.0 (for degrees);
 	f32 GetAngleDifference(const f32 x, const f32 y, const f32 c, bool relative = false);
 
+	bool IsVectorInBox(const Vector &point, const Vector &mins, const Vector &maxs);
+
 	// Print functions
 	bool CFormat(char *buffer, u64 buffer_size, const char *text);
 	void SayChat(CBaseEntity *entity, const char *format, ...);
