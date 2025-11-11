@@ -11,11 +11,6 @@ void SurfTriggerService::Reset()
 	this->triggerTrackers.RemoveAll();
 	this->modifiers = {};
 	this->lastModifiers = {};
-	this->antiBhopActive = {};
-	this->lastAntiBhopActive = {};
-	this->lastTouchedSingleBhop = {};
-	this->bhopTouchCount = {};
-	this->lastTouchedSequentialBhops = {};
 	this->pushEvents.RemoveAll();
 }
 
@@ -52,32 +47,12 @@ void SurfTriggerService::OnPhysicsSimulatePost()
 		2. The apply part is here mostly just to replicate the values to the client, with the exception of push triggers.
 	*/
 
-	if (this->modifiers.enableSlideCount > 0)
-	{
-		this->ApplySlide(!this->lastModifiers.enableSlideCount);
-	}
-	else if (this->lastModifiers.enableSlideCount > 0)
-	{
-		this->CancelSlide(true);
-	}
-
-	if (this->antiBhopActive)
-	{
-		this->modifiers.jumpFactor = 0.0f;
-		this->ApplyAntiBhop(!this->lastAntiBhopActive);
-	}
-	else if (this->lastAntiBhopActive)
-	{
-		this->CancelAntiBhop(true);
-	}
-
 	this->ApplyJumpFactor(this->modifiers.jumpFactor != this->lastModifiers.jumpFactor);
 	// Try to apply pushes one last time on this tick, to catch all the buttons that were not set during movement processing (attack+attack2).
 	this->ApplyPushes();
 	this->CleanupPushEvents();
 
 	this->lastModifiers = this->modifiers;
-	this->lastAntiBhopActive = this->antiBhopActive;
 }
 
 void SurfTriggerService::OnCheckJumpButton()
@@ -89,14 +64,6 @@ void SurfTriggerService::OnProcessMovement() {}
 
 void SurfTriggerService::OnProcessMovementPost()
 {
-	// if the player isn't touching any bhop triggers on ground/a ladder, then
-	// reset the singlebhop and sequential bhop state.
-	if ((this->player->GetPlayerPawn()->m_fFlags & FL_ONGROUND || this->player->GetMoveType() == MOVETYPE_LADDER) && this->bhopTouchCount == 0)
-	{
-		this->ResetBhopState();
-	}
-
-	this->antiBhopActive = false;
 	this->modifiers.jumpFactor = 1.0f;
 	this->ApplyPushes();
 	this->CleanupPushEvents();
@@ -110,20 +77,6 @@ void SurfTriggerService::OnStopTouchGround()
 		if (!tracker.surfTrigger)
 		{
 			continue;
-		}
-		if (Surf::mapapi::IsBhopTrigger(tracker.surfTrigger->type))
-		{
-			// set last touched triggers for single and sequential bhop.
-			if (tracker.surfTrigger->type == SURFTRIGGER_SEQUENTIAL_BHOP)
-			{
-				CEntityHandle handle = tracker.surfTrigger->entity;
-				this->lastTouchedSequentialBhops.Write(handle);
-			}
-
-			// NOTE: For singlebhops, we don't care which type of bhop we last touched, because
-			//  otherwise jumping back and forth between a multibhop and a singlebhop wouldn't work.
-			// We only care about the most recently touched trigger!
-			this->lastTouchedSingleBhop = tracker.surfTrigger->entity;
 		}
 		if (this->player->jumped && Surf::mapapi::IsPushTrigger(tracker.surfTrigger->type)
 			&& tracker.surfTrigger->push.pushConditions & SurfMapPush::SURF_PUSH_JUMP_EVENT)
@@ -219,9 +172,6 @@ void SurfTriggerService::UpdateTriggerTouchList()
 		}
 	}
 
-	// Reset antibhop state, we will re-evaluate it again inside touch events.
-	this->antiBhopActive = false;
-
 	FOR_EACH_VEC(filter.hitTriggerHandles, i)
 	{
 		CEntityHandle handle = filter.hitTriggerHandles[i];
@@ -265,28 +215,6 @@ void SurfTriggerService::EndTouchAll()
 		}
 		this->EndTouch(trigger);
 	}
-}
-
-bool SurfTriggerService::IsPossibleLegacyBhopTrigger(CTriggerMultiple *trigger)
-{
-	if (!trigger)
-	{
-		return false;
-	}
-	if (trigger->m_iFilterName().String()[0] == 0 && !trigger->m_hFilter().IsValid())
-	{
-		return false;
-	}
-	EntityIOConnection_t *connection = trigger->m_OnTrigger().m_pConnections;
-	while (connection)
-	{
-		if (!V_stricmp(connection->m_targetInput.ToCStr(), "TeleportEntity"))
-		{
-			return true;
-		}
-		connection = connection->m_pNext;
-	}
-	return false;
 }
 
 void SurfTriggerService::TouchAll()
@@ -388,9 +316,6 @@ void SurfTriggerService::StartTouch(CBaseTrigger *trigger)
 		tracker = triggerTrackers.AddToTailGetPtr();
 		tracker->triggerHandle = trigger->GetRefEHandle();
 		tracker->startTouchTime = g_pSurfUtils->GetServerGlobals()->curtime;
-		tracker->isPossibleLegacyBhopTrigger = V_stricmp(trigger->GetClassname(), "trigger_multiple") == 0
-												   ? SurfTriggerService::IsPossibleLegacyBhopTrigger((CTriggerMultiple *)trigger)
-												   : false;
 		tracker->surfTrigger = Surf::mapapi::GetSurfTrigger(trigger);
 	}
 

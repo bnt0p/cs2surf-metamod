@@ -83,20 +83,6 @@ void SurfCheckpointService::SetCheckpoint()
 		return;
 	}
 
-	if (this->player->triggerService->InAntiCpArea())
-	{
-		this->player->languageService->PrintChat(true, false, "Can't Checkpoint (Anti Checkpoint Area)");
-		this->player->PlayErrorSound();
-		return;
-	}
-
-	if (this->player->triggerService->InBhopTriggers())
-	{
-		this->player->languageService->PrintChat(true, false, "Can't Checkpoint (Just Landed)");
-		this->player->PlayErrorSound();
-		return;
-	}
-
 	u32 flags = pawn->m_fFlags();
 	if (!(flags & FL_ONGROUND) && !(pawn->m_MoveType() == MOVETYPE_LADDER))
 	{
@@ -144,18 +130,6 @@ void SurfCheckpointService::UndoTeleport()
 		this->player->PlayErrorSound();
 		return;
 	}
-	if (this->undoTeleportData.teleportInAntiCpTrigger)
-	{
-		this->player->languageService->PrintChat(true, false, "Can't Undo (AntiCp)");
-		this->player->PlayErrorSound();
-		return;
-	}
-	if (this->undoTeleportData.teleportInBhopTrigger)
-	{
-		this->player->languageService->PrintChat(true, false, "Can't Undo (Just Landed)");
-		this->player->PlayErrorSound();
-		return;
-	}
 
 	this->DoTeleport(this->undoTeleportData);
 }
@@ -183,22 +157,13 @@ void SurfCheckpointService::DoTeleport(const Checkpoint cp)
 	{
 		return;
 	}
-
-	if (!this->player->triggerService->CanTeleportToCheckpoints())
-	{
-		this->player->languageService->PrintChat(true, false, "Can't Teleport (Map)");
-		this->player->PlayErrorSound();
-		return;
-	}
-
+	
 	Vector currentOrigin;
 	this->player->GetOrigin(&currentOrigin);
 
 	// Update data for undoing teleports
 	u32 flags = pawn->m_fFlags();
 	this->undoTeleportData.teleportOnGround = ((flags & FL_ONGROUND) || (pawn->m_MoveType() == MOVETYPE_LADDER));
-	this->undoTeleportData.teleportInAntiCpTrigger = this->player->triggerService->InAntiCpArea();
-	this->undoTeleportData.teleportInBhopTrigger = this->player->triggerService->InBhopTriggers();
 	this->undoTeleportData.origin = currentOrigin;
 	this->player->GetAngles(&this->undoTeleportData.angles);
 	this->undoTeleportData.slopeDropHeight = pawn->m_flSlopeDropHeight();
@@ -358,6 +323,12 @@ void SurfCheckpointService::SetStartPosition()
 {
 	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
 	if (!pawn)
+	{
+		this->player->languageService->PrintChat(true, false, "Can't Set Custom Start Position (Generic)");
+		this->player->PlayErrorSound();
+		return;
+	}
+	if (!this->player->timerService->InStartzone())
 	{
 		this->player->languageService->PrintChat(true, false, "Can't Set Custom Start Position (Generic)");
 		this->player->PlayErrorSound();

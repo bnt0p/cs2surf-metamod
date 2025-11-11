@@ -5,80 +5,6 @@
 #include "surf/style/surf_style.h"
 #include "surf/timer/surf_timer.h"
 
-void SurfTriggerService::ResetBhopState()
-{
-	this->lastTouchedSingleBhop = CEntityHandle();
-	// all hail fixed buffers
-	this->lastTouchedSequentialBhops = CSequentialBhopBuffer();
-}
-
-void SurfTriggerService::UpdateModifiersInternal()
-{
-	if (this->modifiers.enableSlideCount > 0)
-	{
-		this->ApplySlide();
-	}
-	else
-	{
-		this->CancelSlide();
-	}
-
-	if (this->antiBhopActive)
-	{
-		this->ApplyAntiBhop();
-	}
-	else
-	{
-		this->CancelAntiBhop();
-	}
-
-	if (this->modifiers.forcedDuckCount > 0)
-	{
-		this->ApplyForcedDuck();
-	}
-	else if (this->lastModifiers.forcedDuckCount > 0)
-	{
-		this->CancelForcedDuck();
-	}
-
-	if (this->modifiers.forcedUnduckCount > 0)
-	{
-		this->ApplyForcedUnduck();
-	}
-	else if (this->lastModifiers.forcedUnduckCount > 0)
-	{
-		this->CancelForcedUnduck();
-	}
-}
-
-bool SurfTriggerService::InAntiPauseArea()
-{
-	return this->modifiers.disablePausingCount > 0;
-}
-
-bool SurfTriggerService::InBhopTriggers()
-{
-	FOR_EACH_VEC(this->triggerTrackers, i)
-	{
-		bool justTouched = g_pSurfUtils->GetServerGlobals()->curtime - this->triggerTrackers[i].startTouchTime < 0.15f;
-		if (justTouched && this->triggerTrackers[i].isPossibleLegacyBhopTrigger)
-		{
-			return true;
-		}
-	}
-	return this->bhopTouchCount > 0;
-}
-
-bool SurfTriggerService::InAntiCpArea()
-{
-	return this->modifiers.disableCheckpointsCount > 0;
-}
-
-bool SurfTriggerService::CanTeleportToCheckpoints()
-{
-	return this->modifiers.disableTeleportsCount <= 0;
-}
-
 void SurfTriggerService::TouchModifierTrigger(TriggerTouchTracker tracker)
 {
 	const SurfTrigger *trigger = tracker.surfTrigger;
@@ -96,27 +22,9 @@ void SurfTriggerService::TouchModifierTrigger(TriggerTouchTracker tracker)
 	this->modifiers.jumpFactor = trigger->modifier.jumpFactor;
 }
 
-void SurfTriggerService::TouchAntibhopTrigger(TriggerTouchTracker tracker)
-{
-	f32 timeOnGround = g_pSurfUtils->GetServerGlobals()->curtime - this->player->landingTimeServer;
-	if (tracker.surfTrigger->antibhop.time == 0                          // No jump trigger
-		|| timeOnGround <= tracker.surfTrigger->antibhop.time            // Haven't touched the trigger for long enough
-		|| (this->player->GetPlayerPawn()->m_fFlags & FL_ONGROUND) == 0) // Not on the ground (for prediction)
-	{
-		this->antiBhopActive = true;
-	}
-}
-
 bool SurfTriggerService::TouchTeleportTrigger(TriggerTouchTracker tracker)
 {
 	bool shouldTeleport = false;
-
-	bool isBhopTrigger = Surf::mapapi::IsBhopTrigger(tracker.surfTrigger->type);
-	// Do not teleport the player if it's a bhop trigger and they are not on the ground.
-	if (isBhopTrigger && (this->player->GetPlayerPawn()->m_fFlags & FL_ONGROUND) == 0)
-	{
-		return false;
-	}
 
 	CEntityHandle destinationHandle = GameEntitySystem()->FindFirstEntityHandleByName(tracker.surfTrigger->teleport.destination);
 	CBaseEntity *destination = dynamic_cast<CBaseEntity *>(GameEntitySystem()->GetEntityInstance(destinationHandle));
@@ -144,37 +52,7 @@ bool SurfTriggerService::TouchTeleportTrigger(TriggerTouchTracker tracker)
 		return false;
 	}
 
-	if (isBhopTrigger && (this->player->GetPlayerPawn()->m_fFlags & FL_ONGROUND))
-	{
-		f32 effectiveStartTouchTime = MAX(this->player->landingTimeServer, tracker.startTouchTime);
-		f32 touchingTime = g_pSurfUtils->GetServerGlobals()->curtime - effectiveStartTouchTime;
-		if (touchingTime > tracker.surfTrigger->teleport.delay)
-		{
-			shouldTeleport = true;
-		}
-		else if (tracker.surfTrigger->type == SURFTRIGGER_SINGLE_BHOP)
-		{
-			shouldTeleport = this->lastTouchedSingleBhop == tracker.surfTrigger->entity;
-		}
-		else if (tracker.surfTrigger->type == SURFTRIGGER_SEQUENTIAL_BHOP)
-		{
-			for (i32 i = 0; i < this->lastTouchedSequentialBhops.GetReadAvailable(); i++)
-			{
-				CEntityHandle handle = CEntityHandle();
-				if (!this->lastTouchedSequentialBhops.Peek(&handle, i))
-				{
-					assert(0);
-					break;
-				}
-				if (handle == tracker.surfTrigger->entity)
-				{
-					shouldTeleport = true;
-					break;
-				}
-			}
-		}
-	}
-	else if (tracker.surfTrigger->type == SURFTRIGGER_TELEPORT)
+	if (tracker.surfTrigger->type == SURFTRIGGER_TELEPORT)
 	{
 		f32 touchingTime = g_pSurfUtils->GetServerGlobals()->curtime - tracker.startTouchTime;
 		shouldTeleport = touchingTime > tracker.surfTrigger->teleport.delay || tracker.surfTrigger->teleport.delay <= 0;
@@ -253,63 +131,6 @@ void SurfTriggerService::TouchPushTrigger(TriggerTouchTracker tracker)
 	{
 		this->AddPushEvent(tracker.surfTrigger);
 	}
-}
-
-void SurfTriggerService::ApplySlide(bool replicate)
-{
-	const CVValue_t *aaValue = player->GetCvarValueFromModeStyles("sv_airaccelerate");
-	const CVValue_t newAA = aaValue->m_fl32Value * 4.0f;
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_standable_normal", "2", replicate);
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_walkable_normal", "2", replicate);
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_airaccelerate", &newAA, replicate);
-}
-
-void SurfTriggerService::CancelSlide(bool replicate)
-{
-	const CVValue_t *standableValue = player->GetCvarValueFromModeStyles("sv_standable_normal");
-	const CVValue_t *walkableValue = player->GetCvarValueFromModeStyles("sv_walkable_normal");
-	const CVValue_t *aaValue = player->GetCvarValueFromModeStyles("sv_airaccelerate");
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_airaccelerate", aaValue, replicate);
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_standable_normal", standableValue, replicate);
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_walkable_normal", walkableValue, replicate);
-}
-
-void SurfTriggerService::ApplyAntiBhop(bool replicate)
-{
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_jump_spam_penalty_time", "999999.9", replicate);
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_autobunnyhopping", "false", replicate);
-	player->GetMoveServices()->m_bOldJumpPressed() = true;
-}
-
-void SurfTriggerService::CancelAntiBhop(bool replicate)
-{
-	const CVValue_t *spamModeValue = player->GetCvarValueFromModeStyles("sv_jump_spam_penalty_time");
-	const CVValue_t *autoBhopValue = player->GetCvarValueFromModeStyles("sv_autobunnyhopping");
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_jump_spam_penalty_time", spamModeValue, replicate);
-	utils::SetConVarValue(player->GetPlayerSlot(), "sv_autobunnyhopping", autoBhopValue, replicate);
-}
-
-void SurfTriggerService::ApplyForcedDuck()
-{
-	this->player->GetMoveServices()->m_bDuckOverride(true);
-}
-
-void SurfTriggerService::CancelForcedDuck()
-{
-	this->player->GetMoveServices()->m_bDuckOverride(false);
-}
-
-void SurfTriggerService::ApplyForcedUnduck()
-{
-	// Set crouch time to a very large value so that the player cannot reduck.
-	this->player->GetMoveServices()->m_flLastDuckTime(100000.0f);
-	// This needs to be done every tick just since the player can be in spots that are not unduckable (eg. crouch tunnels)
-	this->player->GetPlayerPawn()->m_fFlags(this->player->GetPlayerPawn()->m_fFlags() & ~FL_DUCKING);
-}
-
-void SurfTriggerService::CancelForcedUnduck()
-{
-	this->player->GetMoveServices()->m_flLastDuckTime(0.0f);
 }
 
 void SurfTriggerService::ApplyJumpFactor(bool replicate)

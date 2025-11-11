@@ -764,21 +764,14 @@ CConVar<Color> surf_trigger_multiple_colors[SURFTRIGGER_COUNT] =
 {
 	{"surf_trigger_multiple_color", FCVAR_NONE, "Color of trigger_multiple (rgba) drawn by surf_showtriggers.", Color(255, 199, 105, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_modifiers_color", FCVAR_NONE, "Color of Mapping API's Modifiers trigger (rgba) drawn by surf_showtriggers.", Color(255, 255, 128, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_reset_checkpoints_color", FCVAR_NONE, "Color of Mapping API's Reset Checkpoints trigger (rgba) drawn by surf_showtriggers.", Color(255, 140, 204, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_single_bhop_reset_color", FCVAR_NONE, "Color of Mapping API's Single bhop reset trigger (rgba) drawn by surf_showtriggers.", Color(140, 255, 212, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_anti_bhop_color", FCVAR_NONE, "Color of Mapping API's Anti Bhop trigger (rgba) drawn by surf_showtriggers.", Color(255, 64, 64, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_start_zone_color", FCVAR_NONE, "Color of Mapping API's Start Zone trigger (rgba) drawn by surf_showtriggers.", Color(0, 255, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_end_zone_color", FCVAR_NONE, "Color of Mapping API's End Zone trigger (rgba) drawn by surf_showtriggers.", Color(255, 0, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_bonus_start_zone_color", FCVAR_NONE, "Color of Mapping API's Bonus Start Zone trigger (rgba) drawn by surf_showtriggers.", Color(0, 255, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_bonus_end_zone_color", FCVAR_NONE, "Color of Mapping API's Bonus End Zone trigger (rgba) drawn by surf_showtriggers.", Color(0, 255, 0, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_split_zone_color", FCVAR_NONE, "Color of Mapping API's Split Zone trigger (rgba) drawn by surf_showtriggers.", Color(0, 255, 228, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_checkpoint_zone_color", FCVAR_NONE, "Color of Mapping API's Checkpoint Zone trigger (rgba) drawn by surf_showtriggers.", Color(219, 255, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_stage_zone_color", FCVAR_NONE, "Color of Mapping API's Stage Zone trigger (rgba) drawn by surf_showtriggers.", Color(255, 157, 0, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_general_teleport_color", FCVAR_NONE, "Color of Mapping API's General Teleport trigger (rgba) drawn by surf_showtriggers.", Color(230, 117, 255, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_destination_color", FCVAR_NONE, "Color of Mapping API's Teleport Destination trigger (rgba) drawn by surf_showtriggers.", Color(230, 117, 255, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_multi_bhop_color", FCVAR_NONE, "Color of Mapping API's Multi Bhop trigger (rgba) drawn by surf_showtriggers.", Color(79, 31, 255, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_single_bhop_color", FCVAR_NONE, "Color of Mapping API's Single Bhop trigger (rgba) drawn by surf_showtriggers.", Color(31, 107, 255, 0x80), OnDebugColorCvarChanged},
-	{"surf_trigger_mappingapi_sequential_bhop_color", FCVAR_NONE, "Color of Mapping API's Sequential Bhop trigger (rgba) drawn by surf_showtriggers.", Color(196, 84, 214, 0x80), OnDebugColorCvarChanged},
 	{"surf_trigger_mappingapi_push_color", FCVAR_NONE, "Color of Mapping API's Push trigger (rgba) drawn by surf_showtriggers.", Color(155, 255, 0, 0x80), OnDebugColorCvarChanged},
 };
 

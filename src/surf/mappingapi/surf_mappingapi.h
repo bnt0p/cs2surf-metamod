@@ -9,13 +9,11 @@
 
 #define SURF_MAPAPI_VERSION 2
 
-#define SURF_MAX_SPLIT_ZONES        100
 #define SURF_MAX_CHECKPOINT_ZONES   100
 #define SURF_MAX_STAGE_ZONES        100
 #define SURF_MAX_COURSE_COUNT       128
 #define SURF_MAX_COURSE_NAME_LENGTH 65
 
-#define INVALID_SPLIT_NUMBER      0
 #define INVALID_CHECKPOINT_NUMBER 0
 #define INVALID_STAGE_NUMBER      0
 #define INVALID_COURSE_NUMBER     0
@@ -27,22 +25,15 @@ enum SurfTriggerType
 {
 	SURFTRIGGER_DISABLED = 0,
 	SURFTRIGGER_MODIFIER,
-	SURFTRIGGER_RESET_CHECKPOINTS,
-	SURFTRIGGER_SINGLE_BHOP_RESET,
-	SURFTRIGGER_ANTI_BHOP,
 
 	SURFTRIGGER_ZONE_START,
 	SURFTRIGGER_ZONE_END,
-	SURFTRIGGER_ZONE_SPLIT,
 	SURFTRIGGER_ZONE_CHECKPOINT,
 	SURFTRIGGER_ZONE_STAGE,
 	SURFTRIGGER_ZONE_BONUS_START,
 	SURFTRIGGER_ZONE_BONUS_END,
 
 	SURFTRIGGER_TELEPORT,
-	SURFTRIGGER_MULTI_BHOP,
-	SURFTRIGGER_SINGLE_BHOP,
-	SURFTRIGGER_SEQUENTIAL_BHOP,
 
 	SURFTRIGGER_DESTINATION,
 
@@ -53,21 +44,8 @@ enum SurfTriggerType
 // SURFTRIGGER_MODIFIER
 struct SurfMapModifier
 {
-	bool disablePausing;
-	bool disableCheckpoints;
-	bool disableTeleports;
-	bool disableJumpstats;
-	bool enableSlide;
 	f32 gravity;
 	f32 jumpFactor;
-	bool forceDuck;
-	bool forceUnduck;
-};
-
-// SURFTRIGGER_ANTI_BHOP
-struct SurfMapAntibhop
-{
-	f32 time;
 };
 
 // SURFTRIGGER_ZONE_*
@@ -78,7 +56,7 @@ struct SurfMapZone
 	i32 bonus;
 };
 
-// SURFTRIGGER_TELEPORT/_MULTI_BHOP/_SINGLE_BHOP/_SEQUENTIAL_BHOP
+// SURFTRIGGER_TELEPORT
 struct SurfMapTeleport
 {
 	char destination[128];
@@ -119,9 +97,9 @@ struct SurfMapPush
 struct SurfCourseDescriptor
 
 {
-	SurfCourseDescriptor(i32 hammerId = -1, const char *targetName = "", bool disableCheckpoints = false, u32 guid = 0,
+	SurfCourseDescriptor(i32 hammerId = -1, const char *targetName = "", u32 guid = 0,
 						 i32 courseID = INVALID_COURSE_NUMBER, const char *courseName = "")
-		: hammerId(hammerId), disableCheckpoints(disableCheckpoints), guid(guid), id(courseID)
+		: hammerId(hammerId), guid(guid), id(courseID)
 	{
 		V_snprintf(entityTargetname, sizeof(entityTargetname), "%s", targetName);
 		V_snprintf(name, sizeof(name), "%s", courseName);
@@ -129,7 +107,6 @@ struct SurfCourseDescriptor
 
 	char entityTargetname[128] {};
 	i32 hammerId = -1;
-	bool disableCheckpoints = false;
 
 	bool hasStartPosition = false;
 	Vector startPosition;
@@ -146,7 +123,6 @@ struct SurfCourseDescriptor
 	Vector endPosition;
 	QAngle endAngles;
 
-	i32 splitCount {};
 	i32 checkpointCount {};
 	i32 stageCount {};
 
@@ -188,7 +164,6 @@ struct SurfTrigger
 	union
 	{
 		SurfMapModifier modifier;
-		SurfMapAntibhop antibhop;
 		SurfMapZone zone;
 		SurfMapTeleport teleport;
 		SurfMapPush push;
@@ -212,14 +187,9 @@ namespace Surf::mapapi
 	const SurfCourseDescriptor *GetCourseDescriptorFromTrigger(CBaseTrigger *trigger);
 	const SurfCourseDescriptor *GetCourseDescriptorFromTrigger(const SurfTrigger *trigger);
 
-	inline bool IsBhopTrigger(SurfTriggerType triggerType)
-	{
-		return triggerType == SURFTRIGGER_MULTI_BHOP || triggerType == SURFTRIGGER_SINGLE_BHOP || triggerType == SURFTRIGGER_SEQUENTIAL_BHOP;
-	}
-
 	inline bool IsTimerTrigger(SurfTriggerType triggerType)
 	{
-		static_assert(SURFTRIGGER_ZONE_START == 5 && SURFTRIGGER_ZONE_BONUS_END == 11,
+		static_assert(SURFTRIGGER_ZONE_START == 2 && SURFTRIGGER_ZONE_BONUS_END == 7,
 					  "Don't forget to change this function when changing the SurfTriggerType enum!!!");
 		return triggerType >= SURFTRIGGER_ZONE_START && triggerType <= SURFTRIGGER_ZONE_BONUS_END;
 	}

@@ -29,8 +29,6 @@ public:
 	struct UndoTeleportData : public Checkpoint
 	{
 		bool teleportOnGround {};
-		bool teleportInBhopTrigger {};
-		bool teleportInAntiCpTrigger {};
 	};
 
 private:

@@ -45,7 +45,6 @@ public:
 
 		// Server time
 		f32 startTouchTime {};
-		bool isPossibleLegacyBhopTrigger {};
 
 		bool CanStartTouch()
 		{
@@ -94,52 +93,19 @@ private:
 	// Mapping API stuff.
 	struct Modifiers
 	{
-		i32 disablePausingCount;
-		i32 disableCheckpointsCount;
-		i32 disableTeleportsCount;
-		i32 enableSlideCount;
-		i32 forcedDuckCount;
-		i32 forcedUnduckCount;
 		f32 jumpFactor = 1.0f;
 	};
 
 	Modifiers modifiers {};
 	Modifiers lastModifiers {};
-	bool antiBhopActive;
-	bool lastAntiBhopActive;
-
-	CEntityHandle lastTouchedSingleBhop {};
-	i32 bhopTouchCount {};
-
-	class CSequentialBhopBuffer : public CFixedSizeCircularBuffer<CEntityHandle, 64>
-	{
-		virtual void ElementAlloc(CEntityHandle &element) {};
-		virtual void ElementRelease(CEntityHandle &element) {};
-	};
-
-	CSequentialBhopBuffer lastTouchedSequentialBhops {};
 
 	void TouchModifierTrigger(TriggerTouchTracker tracker);
-	void TouchAntibhopTrigger(TriggerTouchTracker tracker);
 	bool TouchTeleportTrigger(TriggerTouchTracker tracker);
 	void TouchPushTrigger(TriggerTouchTracker tracker);
-	void ResetBhopState();
 
 	void UpdateModifiersInternal();
 
 	void ApplyJumpFactor(bool replicate = false);
-
-	void ApplySlide(bool replicate = false);
-	void CancelSlide(bool replicate = false);
-
-	void ApplyAntiBhop(bool replicate = false);
-	void CancelAntiBhop(bool replicate = false);
-
-	void ApplyForcedDuck();
-	void CancelForcedDuck();
-
-	void ApplyForcedUnduck();
-	void CancelForcedUnduck();
 
 	CUtlVector<PushEvent> pushEvents;
 	void AddPushEvent(const SurfTrigger *trigger);
@@ -175,7 +141,6 @@ public:
 	void TouchAll();
 	void EndTouchAll();
 
-	static bool IsPossibleLegacyBhopTrigger(CTriggerMultiple *trigger);
 	// Return true if this interaction is managed by TriggerFix.
 	static bool IsManagedByTriggerService(CBaseEntity *toucher, CBaseEntity *touched);
 
@@ -203,11 +168,6 @@ public:
 
 	void UpdatePreTouchData();
 	void UpdatePlayerPostTouch();
-
-	bool InAntiPauseArea();
-	bool InBhopTriggers();
-	bool InAntiCpArea();
-	bool CanTeleportToCheckpoints();
 };
 
 inline bool operator==(const SurfTriggerService::TriggerTouchTracker &left, const SurfTriggerService::TriggerTouchTracker &right)

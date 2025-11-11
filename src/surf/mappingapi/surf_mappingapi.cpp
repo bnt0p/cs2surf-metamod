@@ -59,8 +59,8 @@ static_global struct
 static_global CTimer<> *g_errorTimer;
 static_global const char *g_errorPrefix = "{darkred} ERROR: ";
 static_global const char *g_triggerNames[] = {
-	"Disabled",       "Modifier",   "Reset Checkpoints", "Single Bhop Reset", "Antibhop", "Start zone", "End zone",    "Bonus start zone",
-	"Bonus end zone", "Split zone", "Checkpoint zone",   "Stage zone",        "Teleport", "Multi bhop", "Single bhop", "Sequential bhop"};
+	"Disabled",        "Modifier",   "Start zone", "End zone", "Bonus start zone", "Bonus end zone",
+	"Checkpoint zone", "Stage zone", "Teleport"};
 
 static_function MappingInterface g_mappingInterface;
 
@@ -109,7 +109,7 @@ static_function f64 Mapi_PrintErrors()
 }
 
 static_function bool Mapi_CreateCourse(i32 courseNumber = 1, const char *courseName = SURF_NO_MAPAPI_COURSE_NAME, i32 hammerId = -1,
-									   const char *targetName = SURF_NO_MAPAPI_COURSE_DESCRIPTOR, bool disableCheckpoints = false)
+									   const char *targetName = SURF_NO_MAPAPI_COURSE_DESCRIPTOR)
 {
 	// Make sure we don't exceed this ridiculous value.
 	// If we do, it is most likely that something went wrong, or it is caused by the mapper.
@@ -136,7 +136,7 @@ static_function bool Mapi_CreateCourse(i32 courseNumber = 1, const char *courseN
 	}
 	u32 guid = (u32)g_mappingApi.courseDescriptors.Count() + 1;
 
-	i32 index = g_mappingApi.courseDescriptors.AddToTail({hammerId, targetName, disableCheckpoints, guid, courseNumber, courseName});
+	i32 index = g_mappingApi.courseDescriptors.AddToTail({hammerId, targetName, guid, courseNumber, courseName});
 	g_sortedCourses.Insert(&g_mappingApi.courseDescriptors[index]);
 	return true;
 }
@@ -199,35 +199,14 @@ static_function void Mapi_OnTriggerMultipleSpawn(const EntitySpawnInfo_t *info)
 	{
 		case SURFTRIGGER_MODIFIER:
 		{
-			trigger.modifier.disablePausing = ekv->GetBool("timer_modifier_disable_pause");
-			trigger.modifier.disableCheckpoints = ekv->GetBool("timer_modifier_disable_checkpoints");
-			trigger.modifier.disableTeleports = ekv->GetBool("timer_modifier_disable_teleports");
-			trigger.modifier.disableJumpstats = ekv->GetBool("timer_modifier_disable_jumpstats");
-			trigger.modifier.enableSlide = ekv->GetBool("timer_modifier_enable_slide");
 			trigger.modifier.gravity = ekv->GetFloat("timer_modifier_gravity", 1);
 			trigger.modifier.jumpFactor = ekv->GetFloat("timer_modifier_jump_impulse", 1.0f);
-			trigger.modifier.forceDuck = ekv->GetBool("timer_modifier_force_duck");
-			trigger.modifier.forceUnduck = ekv->GetBool("timer_modifier_force_unduck");
 		}
 		break;
-
-		// NOTE: Nothing to do here
-		case SURFTRIGGER_RESET_CHECKPOINTS:
-		case SURFTRIGGER_SINGLE_BHOP_RESET:
-			break;
-
-		case SURFTRIGGER_ANTI_BHOP:
-		{
-			trigger.antibhop.time = ekv->GetFloat("timer_anti_bhop_time");
-			trigger.antibhop.time = MAX(trigger.antibhop.time, 0);
-		}
-		break;
-
 		case SURFTRIGGER_ZONE_START:
 		case SURFTRIGGER_ZONE_END:
 		case SURFTRIGGER_ZONE_BONUS_START:
 		case SURFTRIGGER_ZONE_BONUS_END:
-		case SURFTRIGGER_ZONE_SPLIT:
 		case SURFTRIGGER_ZONE_CHECKPOINT:
 		case SURFTRIGGER_ZONE_STAGE:
 		{
@@ -242,19 +221,7 @@ static_function void Mapi_OnTriggerMultipleSpawn(const EntitySpawnInfo_t *info)
 			}
 
 			snprintf(trigger.zone.courseDescriptor, sizeof(trigger.zone.courseDescriptor), "%s", courseDescriptor);
-			// TODO: code is a little repetitive...
-			if (type == SURFTRIGGER_ZONE_SPLIT)
-			{
-				trigger.zone.number = ekv->GetInt("timer_zone_split_number", INVALID_SPLIT_NUMBER);
-				if (trigger.zone.number <= INVALID_SPLIT_NUMBER)
-				{
-					Mapi_Error("Split zone number \"%i\" is invalid! Hammer ID %i, origin (%.0f %.0f %.0f)", trigger.zone.number, hammerId, origin.x,
-							   origin.y, origin.z);
-					assert(0);
-					return;
-				}
-			}
-			else if (type == SURFTRIGGER_ZONE_CHECKPOINT)
+			if (type == SURFTRIGGER_ZONE_CHECKPOINT)
 			{
 				trigger.zone.number = ekv->GetInt("timer_zone_checkpoint_number", INVALID_CHECKPOINT_NUMBER);
 
@@ -372,7 +339,7 @@ static_function void Mapi_OnTriggerMultipleSpawn(const EntitySpawnInfo_t *info)
 					bonusName.Format("B%d", bonusNum);
 
 					snprintf(bonusDescriptor, sizeof(bonusDescriptor), "B%d", bonusNum); // Safe C-string
-					Mapi_CreateCourse(bonusNum + 1, bonusName.Get(), g_mappingApi.courseDescriptors.Count() + 1, bonusDescriptor, false);
+					Mapi_CreateCourse(bonusNum + 1, bonusName.Get(), g_mappingApi.courseDescriptors.Count() + 1, bonusDescriptor);
 
 					isBonusStart = true;
 				}
@@ -386,7 +353,7 @@ static_function void Mapi_OnTriggerMultipleSpawn(const EntitySpawnInfo_t *info)
 					bonusName.Format("B%d", bonusNum);
 
 					snprintf(bonusDescriptor, sizeof(bonusDescriptor), "B%d", bonusNum); // Safe C-string
-					Mapi_CreateCourse(bonusNum + 1, bonusName.Get(), g_mappingApi.courseDescriptors.Count() + 1, bonusDescriptor, false);
+					Mapi_CreateCourse(bonusNum + 1, bonusName.Get(), g_mappingApi.courseDescriptors.Count() + 1, bonusDescriptor);
 
 					isBonusStart = true;
 				}
@@ -458,7 +425,7 @@ static_function void Mapi_OnInfoTargetSpawn(const CEntityKeyValues *ekv)
 		return;
 	}
 
-	Mapi_CreateCourse(courseNumber, courseName, hammerId, targetName, ekv->GetBool("timer_course_disable_checkpoint"));
+	Mapi_CreateCourse(courseNumber, courseName, hammerId, targetName);
 }
 
 static_function SurfTrigger *Mapi_FindSurfTrigger(CBaseTrigger *trigger)
@@ -763,10 +730,8 @@ void Surf::mapapi::OnRoundStart()
 		//  and make sure that they all start from 1 and are consecutive by
 		//  XORing the values with a consecutive 1...n sequence.
 		//  https://florian.github.io/xor-trick/
-		i32 splitXor = 0;
 		i32 cpXor = 0;
 		i32 stageXor = 0;
-		i32 splitCount = 0;
 		i32 cpCount = 0;
 		i32 stageCount = 0;
 		SurfCourseDescriptor *courseDescriptor = &g_mappingApi.courseDescriptors[courseInd];
@@ -829,9 +794,6 @@ void Surf::mapapi::OnRoundStart()
 					}
 					break;
 				}
-				case SURFTRIGGER_ZONE_SPLIT:
-					splitXor ^= (++splitCount) ^ trigger->zone.number;
-					break;
 				case SURFTRIGGER_ZONE_CHECKPOINT:
 					cpXor ^= (++cpCount) ^ trigger->zone.number;
 					break;
@@ -839,21 +801,10 @@ void Surf::mapapi::OnRoundStart()
 		}
 
 		bool invalid = false;
-		if (splitXor != 0)
-		{
-			Mapi_Error("Course \"%s\" Split zones aren't consecutive or don't start at 1!", courseDescriptor->name);
-			invalid = true;
-		}
 
 		if (cpXor != 0)
 		{
 			Mapi_Error("Course \"%s\" Checkpoint zones aren't consecutive or don't start at 1!", courseDescriptor->name);
-			invalid = true;
-		}
-
-		if (splitCount > SURF_MAX_SPLIT_ZONES)
-		{
-			Mapi_Error("Course \"%s\" Too many split zones! Maximum is %i.", courseDescriptor->name, SURF_MAX_SPLIT_ZONES);
 			invalid = true;
 		}
 
@@ -875,7 +826,6 @@ void Surf::mapapi::OnRoundStart()
 			courseInd--;
 			break;
 		}
-		courseDescriptor->splitCount = splitCount;
 		courseDescriptor->checkpointCount = cpCount;
 		courseDescriptor->stageCount = stageCount;
 	}
@@ -924,7 +874,6 @@ const SurfCourseDescriptor *Surf::mapapi::GetCourseDescriptorFromTrigger(const S
 		case SURFTRIGGER_ZONE_END:
 		case SURFTRIGGER_ZONE_BONUS_START:
 		case SURFTRIGGER_ZONE_BONUS_END:
-		case SURFTRIGGER_ZONE_SPLIT:
 		case SURFTRIGGER_ZONE_CHECKPOINT:
 		case SURFTRIGGER_ZONE_STAGE:
 		{

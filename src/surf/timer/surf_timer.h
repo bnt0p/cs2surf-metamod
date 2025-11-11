@@ -13,7 +13,6 @@
 #define SURF_TIMER_SND_END              "tr.ScoreRegular"
 #define SURF_TIMER_SND_FALSE_END        "UIPanorama.buymenu_failure"
 #define SURF_TIMER_SND_MISSED_ZONE      "UIPanorama.buymenu_failure"
-#define SURF_TIMER_SND_REACH_SPLIT      "tr.Popup"
 #define SURF_TIMER_SND_REACH_CHECKPOINT "tr.Popup"
 #define SURF_TIMER_SND_REACH_STAGE      "UIPanorama.round_report_odds_up"
 #define SURF_TIMER_SND_STOP             "tr.PuckFail"
@@ -31,7 +30,6 @@ struct PBData
 	void Reset()
 	{
 		overall.pbTime = {};
-		overall.pbSplitZoneTimes.FillWithValue(-1.0);
 		overall.pbCpZoneTimes.FillWithValue(-1.0);
 		overall.pbStageZoneTimes.FillWithValue(-1.0);
 	}
@@ -40,7 +38,6 @@ struct PBData
 	{
 		f64 pbTime {};
 		f64 points {};
-		CUtlVectorFixed<f64, SURF_MAX_SPLIT_ZONES> pbSplitZoneTimes;
 		CUtlVectorFixed<f64, SURF_MAX_CHECKPOINT_ZONES> pbCpZoneTimes;
 		CUtlVectorFixed<f64, SURF_MAX_STAGE_ZONES> pbStageZoneTimes;
 	} overall;
@@ -115,9 +112,7 @@ private:
 	f64 lastStartSoundTime {};
 	f64 lastMissedTimeSoundTime {};
 	bool validTime {};
-
-	u32 lastSplit {};
-	CUtlVectorFixed<f64, SURF_MAX_SPLIT_ZONES> splitZoneTimes {};
+	bool inStartzone {};
 
 	u32 lastCheckpoint {};
 	i32 reachedCheckpoints {};
@@ -175,7 +170,6 @@ public:
 
 	void CheckMissedTime();
 
-	void ShowSplitText(u32 currentSplit);
 	void ShowCheckpointText(u32 currentCheckpoint);
 	void ShowStageText();
 
@@ -208,6 +202,11 @@ public:
 	i32 GetStage()
 	{
 		return currentStage;
+	}
+
+	bool InStartzone()
+	{
+		return inStartzone;
 	}
 
 	std::string GetStartSpeedText(const char *language);
@@ -271,7 +270,6 @@ public:
 
 	void StartZoneStartTouch(const SurfCourseDescriptor *course);
 	void StartZoneEndTouch(const SurfCourseDescriptor *course);
-	void SplitZoneStartTouch(const SurfCourseDescriptor *course, i32 splitNumber);
 	void CheckpointZoneStartTouch(const SurfCourseDescriptor *course, i32 cpNumber);
 	void StageZoneStartTouch(const SurfCourseDescriptor *course, i32 stageNumber);
 	bool TimerStart(const SurfCourseDescriptor *course, bool playSound = true);
@@ -313,7 +311,6 @@ private:
 	void PlayTimerEndSound();
 	void PlayTimerFalseEndSound();
 	void PlayMissedZoneSound();
-	void PlayReachedSplitSound();
 	void PlayReachedCheckpointSound();
 	void PlayReachedStageSound();
 	void PlayTimerStopSound();

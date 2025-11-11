@@ -211,28 +211,6 @@ void SurfTriggerService::OnMappingApiTriggerStartTouchPost(TriggerTouchTracker t
 		case SURFTRIGGER_MODIFIER:
 		{
 			SurfMapModifier modifier = trigger->modifier;
-			this->modifiers.disablePausingCount += modifier.disablePausing ? 1 : 0;
-			this->modifiers.disableCheckpointsCount += modifier.disableCheckpoints ? 1 : 0;
-			this->modifiers.disableTeleportsCount += modifier.disableTeleports ? 1 : 0;
-		}
-		break;
-
-		case SURFTRIGGER_RESET_CHECKPOINTS:
-		{
-			if (this->player->timerService->GetTimerRunning())
-			{
-				if (this->player->checkpointService->GetCheckpointCount())
-				{
-					this->player->languageService->PrintChat(true, false, "Checkpoints Cleared By Map");
-				}
-				this->player->checkpointService->ResetCheckpoints(true, false);
-			}
-		};
-		break;
-
-		case SURFTRIGGER_SINGLE_BHOP_RESET:
-		{
-			this->ResetBhopState();
 		}
 		break;
 
@@ -251,12 +229,6 @@ void SurfTriggerService::OnMappingApiTriggerStartTouchPost(TriggerTouchTracker t
 		}
 		break;
 
-		case SURFTRIGGER_ZONE_SPLIT:
-		{
-			this->player->timerService->SplitZoneStartTouch(course, trigger->zone.number);
-		}
-		break;
-
 		case SURFTRIGGER_ZONE_CHECKPOINT:
 		{
 			this->player->timerService->CheckpointZoneStartTouch(course, trigger->zone.number);
@@ -266,18 +238,6 @@ void SurfTriggerService::OnMappingApiTriggerStartTouchPost(TriggerTouchTracker t
 		case SURFTRIGGER_ZONE_STAGE:
 		{
 			this->player->timerService->StageZoneStartTouch(course, trigger->zone.number);
-		}
-		break;
-
-		case SURFTRIGGER_TELEPORT:
-		case SURFTRIGGER_MULTI_BHOP:
-		case SURFTRIGGER_SINGLE_BHOP:
-		case SURFTRIGGER_SEQUENTIAL_BHOP:
-		{
-			if (Surf::mapapi::IsBhopTrigger(trigger->type))
-			{
-				this->bhopTouchCount++;
-			}
 		}
 		break;
 		case SURFTRIGGER_PUSH:
@@ -304,16 +264,7 @@ void SurfTriggerService::OnMappingApiTriggerTouchPost(TriggerTouchTracker tracke
 		}
 		break;
 
-		case SURFTRIGGER_ANTI_BHOP:
-		{
-			this->TouchAntibhopTrigger(tracker);
-		}
-		break;
-
 		case SURFTRIGGER_TELEPORT:
-		case SURFTRIGGER_MULTI_BHOP:
-		case SURFTRIGGER_SINGLE_BHOP:
-		case SURFTRIGGER_SEQUENTIAL_BHOP:
 		{
 			this->TouchTeleportTrigger(tracker);
 		}
@@ -339,15 +290,6 @@ void SurfTriggerService::OnMappingApiTriggerEndTouchPost(TriggerTouchTracker tra
 		case SURFTRIGGER_MODIFIER:
 		{
 			SurfMapModifier modifier = tracker.surfTrigger->modifier;
-			this->modifiers.disablePausingCount -= modifier.disablePausing ? 1 : 0;
-			this->modifiers.disableCheckpointsCount -= modifier.disableCheckpoints ? 1 : 0;
-			this->modifiers.disableTeleportsCount -= modifier.disableTeleports ? 1 : 0;
-
-			assert(this->modifiers.disablePausingCount >= 0);
-			assert(this->modifiers.disableCheckpointsCount >= 0);
-			assert(this->modifiers.disableTeleportsCount >= 0);
-			assert(this->modifiers.forcedDuckCount >= 0);
-			assert(this->modifiers.forcedUnduckCount >= 0);
 		}
 		break;
 
@@ -356,18 +298,6 @@ void SurfTriggerService::OnMappingApiTriggerEndTouchPost(TriggerTouchTracker tra
 		{
 			this->player->checkpointService->ResetCheckpoints();
 			this->player->timerService->StartZoneEndTouch(course);
-		}
-		break;
-
-		case SURFTRIGGER_TELEPORT:
-		case SURFTRIGGER_MULTI_BHOP:
-		case SURFTRIGGER_SINGLE_BHOP:
-		case SURFTRIGGER_SEQUENTIAL_BHOP:
-		{
-			if (Surf::mapapi::IsBhopTrigger(tracker.surfTrigger->type))
-			{
-				this->bhopTouchCount--;
-			}
 		}
 		break;
 		case SURFTRIGGER_PUSH:

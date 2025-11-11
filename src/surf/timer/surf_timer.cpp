@@ -73,6 +73,7 @@ void SurfTimerService::StartZoneStartTouch(const SurfCourseDescriptor *course)
 {
 	this->touchedGroundSinceTouchingStartZone = !!(this->player->GetPlayerPawn()->m_fFlags & FL_ONGROUND);
 	this->TimerStop(false);
+	this->inStartzone = true;
 }
 
 void SurfTimerService::StartZoneEndTouch(const SurfCourseDescriptor *course)
@@ -81,24 +82,7 @@ void SurfTimerService::StartZoneEndTouch(const SurfCourseDescriptor *course)
 	{
 		this->TimerStart(course);
 	}
-}
-
-void SurfTimerService::SplitZoneStartTouch(const SurfCourseDescriptor *course, i32 splitNumber)
-{
-	if (!this->timerRunning || course->guid != this->currentCourseGUID)
-	{
-		return;
-	}
-
-	assert(splitNumber > INVALID_SPLIT_NUMBER && splitNumber < SURF_MAX_SPLIT_ZONES);
-
-	if (this->splitZoneTimes[splitNumber - 1] < 0)
-	{
-		this->PlayReachedSplitSound();
-		this->splitZoneTimes[splitNumber - 1] = this->GetTime();
-		this->ShowSplitText(splitNumber);
-		this->lastSplit = splitNumber;
-	}
+	this->inStartzone = false;
 }
 
 void SurfTimerService::CheckpointZoneStartTouch(const SurfCourseDescriptor *course, i32 cpNumber)
@@ -189,14 +173,11 @@ bool SurfTimerService::TimerStart(const SurfCourseDescriptor *courseDesc, bool p
 	}
 	this->reachedCheckpoints = 0;
 	this->lastCheckpoint = 0;
-	this->lastSplit = 0;
 
 	f64 invalidTime = -1;
-	this->splitZoneTimes.SetSize(courseDesc->splitCount);
 	this->cpZoneTimes.SetSize(courseDesc->checkpointCount);
 	this->stageZoneTimes.SetSize(courseDesc->checkpointCount);
 
-	this->splitZoneTimes.FillWithValue(invalidTime);
 	this->cpZoneTimes.FillWithValue(invalidTime);
 	this->stageZoneTimes.FillWithValue(invalidTime);
 
@@ -410,11 +391,6 @@ void SurfTimerService::PlayMissedZoneSound()
 	utils::PlaySoundToClient(this->player->GetPlayerSlot(), SURF_TIMER_SND_MISSED_ZONE);
 }
 
-void SurfTimerService::PlayReachedSplitSound()
-{
-	utils::PlaySoundToClient(this->player->GetPlayerSlot(), SURF_TIMER_SND_REACH_SPLIT);
-}
-
 void SurfTimerService::PlayReachedCheckpointSound()
 {
 	utils::PlaySoundToClient(this->player->GetPlayerSlot(), SURF_TIMER_SND_REACH_CHECKPOINT);
@@ -527,16 +503,6 @@ bool SurfTimerService::CanPause(bool showError)
 {
 	if (this->paused)
 	{
-		return false;
-	}
-
-	if (this->player->triggerService->InAntiPauseArea())
-	{
-		if (showError)
-		{
-			this->player->languageService->PrintChat(true, false, "Can't Pause (Anti Pause Area)");
-			this->player->PlayErrorSound();
-		}
 		return false;
 	}
 
@@ -1041,22 +1007,7 @@ void SurfTimerService::InsertRecordToCache(f64 time, const SurfCourseDescriptor 
 		return;
 	}
 
-	KeyValues3 *data = kv.FindMember("splitZoneTimes");
-	if (data && data->GetType() == KV3_TYPE_ARRAY)
-	{
-		for (i32 i = 0; i < course->splitCount; i++)
-		{
-			f64 time = -1.0f;
-			KeyValues3 *element = data->GetArrayElement(i);
-			if (element)
-			{
-				time = element->GetDouble(-1.0);
-			}
-			pb.overall.pbSplitZoneTimes[i] = time;
-		}
-	}
-
-	data = kv.FindMember("cpZoneTimes");
+	KeyValues3 *data = kv.FindMember("cpZoneTimes");
 	if (data && data->GetType() == KV3_TYPE_ARRAY)
 	{
 		for (i32 i = 0; i < course->checkpointCount; i++)
@@ -1123,22 +1074,7 @@ void SurfTimerService::InsertPBToCache(f64 time, const SurfCourseDescriptor *cou
 		return;
 	}
 
-	KeyValues3 *data = kv.FindMember("splitZoneTimes");
-	if (data && data->GetType() == KV3_TYPE_ARRAY)
-	{
-		for (i32 i = 0; i < course->splitCount; i++)
-		{
-			f64 time = -1.0f;
-			KeyValues3 *element = data->GetArrayElement(i);
-			if (element)
-			{
-				time = element->GetDouble(-1.0);
-			}
-			pb.overall.pbSplitZoneTimes[i] = time;
-		}
-	}
-
-	data = kv.FindMember("cpZoneTimes");
+	KeyValues3 *data = kv.FindMember("cpZoneTimes");
 	if (data && data->GetType() == KV3_TYPE_ARRAY)
 	{
 		for (i32 i = 0; i < course->checkpointCount; i++)
@@ -1200,52 +1136,6 @@ void SurfTimerService::CheckMissedTime()
 		this->shouldAnnounceMissedTime = false;
 		this->PlayMissedTimeSound();
 	}
-}
-
-void SurfTimerService::ShowSplitText(u32 currentSplit)
-{
-	const SurfCourseDescriptor *course = this->GetCourse();
-	// No active course so we can't compare anything.
-	if (!course)
-	{
-		return;
-	}
-	// No comparison available for styled runs.
-	if (this->player->styleServices.Count() > 0)
-	{
-		return;
-	}
-
-	CUtlString time;
-	std::string pbDiff = "";
-
-	time = SurfTimerService::FormatTime(this->splitZoneTimes[currentSplit - 1]);
-	if (this->lastSplit != 0)
-	{
-		f64 diff = this->splitZoneTimes[currentSplit - 1] - this->splitZoneTimes[this->lastSplit - 1];
-		CUtlString splitTime = SurfTimerService::FormatDiffTime(diff);
-		splitTime.Format(" {grey}({default}%s{grey})", splitTime.Get());
-		time.Append(splitTime.Get());
-	}
-
-	auto modeInfo = Surf::mode::GetModeInfo(this->player->modeService->GetModeName());
-	PBDataKey key = ToPBDataKey(modeInfo.id, course->guid);
-
-	// Check if there is personal best data for this mode and course.
-	const PBData *pb = this->GetCompareTarget(key);
-	if (pb)
-	{
-		if (pb->overall.pbSplitZoneTimes[currentSplit - 1] > 0)
-		{
-			META_CONPRINTF("pb->overall.pbSplitZoneTimes[currentSplit - 1] = %lf\n", pb->overall.pbSplitZoneTimes[currentSplit - 1]);
-			f64 diff = this->splitZoneTimes[currentSplit - 1] - pb->overall.pbSplitZoneTimes[currentSplit - 1];
-			CUtlString diffText = SurfTimerService::FormatDiffTime(diff);
-			diffText.Format("{grey}%s%s{grey}", diff < 0 ? "{green}" : "{lightred}", diffText.Get());
-			pbDiff = this->player->languageService->PrepareMessage(diffTextKeys[this->currentCompareType], diffText.Get());
-		}
-	}
-
-	this->player->languageService->PrintChat(true, false, "Course Split Reached", currentSplit, time.Get(), pbDiff.c_str());
 }
 
 void SurfTimerService::ShowCheckpointText(u32 currentCheckpoint)
@@ -1342,15 +1232,6 @@ CUtlString SurfTimerService::GetCurrentRunMetadata()
 {
 	KeyValues3 kv(KV3_TYPEEX_TABLE, KV3_SUBTYPE_UNSPECIFIED);
 
-	KeyValues3 *splitZoneTimesKV = kv.FindOrCreateMember("splitZoneTimes");
-
-	splitZoneTimesKV->SetToEmptyArray();
-	FOR_EACH_VEC(this->splitZoneTimes, i)
-	{
-		KeyValues3 *time = splitZoneTimesKV->ArrayAddElementToTail();
-		time->SetDouble(this->splitZoneTimes[i]);
-	}
-
 	KeyValues3 *cpZoneTimesKV = kv.FindOrCreateMember("cpZoneTimes");
 	cpZoneTimesKV->SetToEmptyArray();
 	FOR_EACH_VEC(this->cpZoneTimes, i)
@@ -1358,8 +1239,6 @@ CUtlString SurfTimerService::GetCurrentRunMetadata()
 		KeyValues3 *time = cpZoneTimesKV->ArrayAddElementToTail();
 		time->SetDouble(this->cpZoneTimes[i]);
 	}
-
-	splitZoneTimesKV->SetToEmptyArray();
 
 	KeyValues3 *stageZoneTimesKV = kv.FindOrCreateMember("stageZoneTimes");
 	FOR_EACH_VEC(this->stageZoneTimes, i)
