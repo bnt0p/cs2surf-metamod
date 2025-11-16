@@ -51,3 +51,32 @@ const CVValue_t *Surf64tModeService::GetModeConVarValues()
 {
 	return modeCvarValues;
 }
+
+void Surf64tModeService::OnSetupMove(PlayerCommand *pc)
+{
+	for (i32 j = 0; j < pc->mutable_base()->subtick_moves_size(); j++)
+	{
+		CSubtickMoveStep *subtickMove = pc->mutable_base()->mutable_subtick_moves(j);
+		if (subtickMove->button() == IN_ATTACK || subtickMove->button() == IN_ATTACK2 || subtickMove->button() == IN_RELOAD)
+		{
+			continue;
+		}
+		float when = subtickMove->when();
+		if (subtickMove->button() == IN_JUMP)
+		{
+			f32 inputTime = (g_pSurfUtils->GetGlobals()->tickcount + when - 1) * ENGINE_FIXED_TICK_INTERVAL;
+			if (when != 0)
+			{
+				if (subtickMove->pressed() && inputTime - this->lastJumpReleaseTime > 0.5 * ENGINE_FIXED_TICK_INTERVAL)
+				{
+					this->player->GetMoveServices()->m_bOldJumpPressed = false;
+				}
+				if (!subtickMove->pressed())
+				{
+					this->lastJumpReleaseTime = (g_pSurfUtils->GetGlobals()->tickcount + when - 1) * ENGINE_FIXED_TICK_INTERVAL;
+				}
+			}
+		}
+		subtickMove->set_when(0);
+	}
+}

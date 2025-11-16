@@ -50,4 +50,5 @@ public:
 	virtual const char *GetModeName() override;
 	virtual const char *GetModeShortName() override;
 	virtual const CVValue_t *GetModeConVarValues() override;
+	virtual void OnSetupMove(PlayerCommand *) override;
 };

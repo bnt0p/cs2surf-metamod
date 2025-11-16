@@ -1,20 +1,21 @@
-#include "surf_style_lowgrav.h"
+#include "surf_style_onlyw.h"
+#include "sdk/usercmd.h"
 
 #include "utils/addresses.h"
 #include "utils/interfaces.h"
 #include "utils/gameconfig.h"
 
-SurfLowGravStylePlugin g_SurfLowGravStylePlugin;
+SurfOnlyWStylePlugin g_SurfOnlyWStylePlugin;
 
 CGameConfig *g_pGameConfig = NULL;
 SurfUtils *g_pSurfUtils = NULL;
 SurfStyleManager *g_pStyleManager = NULL;
-StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfLowGravStyleService(player); };
-PLUGIN_EXPOSE(SurfLowGravStylePlugin, g_SurfLowGravStylePlugin);
+StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfOnlyWStyleService(player); };
+PLUGIN_EXPOSE(SurfOnlyWStylePlugin, g_SurfOnlyWStylePlugin);
 
-const char *incompatibleStyles[] = {"HG"};
+const char *incompatibleStyles[] = {"HSW", "SW"};
 
-bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+bool SurfOnlyWStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
 	// Load mode
@@ -55,19 +56,19 @@ bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unload(char *error, size_t maxlen)
+bool SurfOnlyWStylePlugin::Unload(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Pause(char *error, size_t maxlen)
+bool SurfOnlyWStylePlugin::Pause(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unpause(char *error, size_t maxlen)
+bool SurfOnlyWStylePlugin::Unpause(char *error, size_t maxlen)
 {
 	if (!g_pStyleManager->RegisterStyle(g_PLID, STYLE_NAME_SHORT, STYLE_NAME, g_StyleFactory))
 	{
@@ -81,30 +82,41 @@ CGameEntitySystem *GameEntitySystem()
 	return g_pSurfUtils->GetGameEntitySystem();
 }
 
-void SurfLowGravStyleService::Init()
-{
-	// called too early to set gravity scale here
-}
+void SurfOnlyWStyleService::Init() {}
 
-const CVValue_t *SurfLowGravStyleService::GetTweakedConvarValue(const char *name)
+const CVValue_t *SurfOnlyWStyleService::GetTweakedConvarValue(const char *name)
 {
 	return nullptr;
 }
 
-void SurfLowGravStyleService::Cleanup()
-{
-	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn)
-	{
-		pawn->SetGravityScale(1.0f);
-	}
-}
+void SurfOnlyWStyleService::Cleanup() {}
 
-void SurfLowGravStyleService::OnProcessMovement()
+void SurfOnlyWStyleService::OnSetupMove(PlayerCommand *pc)
 {
-	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn && pawn->m_flActualGravityScale != 0.5f)
+	auto subtickMoves = pc->mutable_base()->mutable_subtick_moves();
+	auto iterator = subtickMoves->begin();
+
+	while (iterator != subtickMoves->end())
 	{
-		pawn->SetGravityScale(0.5f);
+		uint64 button = iterator->button();
+		if (button == IN_MOVELEFT || button == IN_MOVERIGHT || button == IN_BACK)
+		{
+			iterator = subtickMoves->erase(iterator);
+		}
+		else
+		{
+			iterator++;
+		}
 	}
+
+	pc->mutable_base()->set_leftmove(0.0f);
+	if (pc->mutable_base()->forwardmove() < 0.0f)
+	{
+		pc->mutable_base()->set_forwardmove(0.0f);
+	}
+
+	// disable buttons for HUD
+	this->player->DisableButton(IN_MOVELEFT);
+	this->player->DisableButton(IN_MOVERIGHT);
+	this->player->DisableButton(IN_BACK);
 }

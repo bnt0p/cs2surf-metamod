@@ -132,3 +132,81 @@ const CVValue_t *Surf128tModeService::GetModeConVarValues()
 {
 	return modeCvarValues;
 }
+
+void Surf128tModeService::OnSetupMove(PlayerCommand *pc)
+{
+	for (i32 j = 0; j < pc->mutable_base()->subtick_moves_size(); j++)
+	{
+		CSubtickMoveStep *subtickMove = pc->mutable_base()->mutable_subtick_moves(j);
+		if (subtickMove->button() == IN_ATTACK || subtickMove->button() == IN_ATTACK2 || subtickMove->button() == IN_RELOAD)
+		{
+			continue;
+		}
+		float when = subtickMove->when();
+		if (subtickMove->button() == IN_JUMP)
+		{
+			f32 inputTime = (g_pSurfUtils->GetGlobals()->tickcount + when - 1) * ENGINE_FIXED_TICK_INTERVAL;
+			if (when != 0)
+			{
+				if (subtickMove->pressed() && inputTime - this->lastJumpReleaseTime > 0.5 * ENGINE_FIXED_TICK_INTERVAL)
+				{
+					this->player->GetMoveServices()->m_bOldJumpPressed = false;
+				}
+				if (!subtickMove->pressed())
+				{
+					this->lastJumpReleaseTime = (g_pSurfUtils->GetGlobals()->tickcount + when - 1) * ENGINE_FIXED_TICK_INTERVAL;
+				}
+			}
+		}
+		subtickMove->set_when(when >= 0.5 ? 0.5 : 0);
+	}
+}
+
+void Surf128tModeService::OnPhysicsSimulate()
+{
+	CCSPlayer_MovementServices *moveServices = this->player->GetMoveServices();
+	if (!moveServices)
+	{
+		return;
+	}
+	u32 tickCount = g_pSurfUtils->GetServerGlobals()->tickcount;
+
+	f32 subtickMoveTime = (tickCount - 0.5) * ENGINE_FIXED_TICK_INTERVAL;
+	for (u32 i = 0; i < 4; i++)
+	{
+		if (fabs(subtickMoveTime - moveServices->m_arrForceSubtickMoveWhen[i]) < 0.001)
+		{
+			return;
+		}
+		if (subtickMoveTime > moveServices->m_arrForceSubtickMoveWhen[i])
+		{
+			moveServices->SetForcedSubtickMove(i, subtickMoveTime, false);
+			return;
+		}
+	}
+}
+
+void Surf128tModeService::OnPhysicsSimulatePost()
+{
+	CCSPlayer_MovementServices *moveServices = this->player->GetMoveServices();
+	if (!moveServices)
+	{
+		return;
+	}
+	u32 tickCount = g_pSurfUtils->GetServerGlobals()->tickcount;
+
+	f32 subtickMoveTime = (tickCount + 0.5) * ENGINE_FIXED_TICK_INTERVAL;
+	for (u32 i = 0; i < 4; i++)
+	{
+		if (fabs(subtickMoveTime - moveServices->m_arrForceSubtickMoveWhen[i]) < 0.001)
+		{
+			subtickMoveTime += ENGINE_FIXED_TICK_INTERVAL;
+			continue;
+		}
+		if (subtickMoveTime > moveServices->m_arrForceSubtickMoveWhen[i])
+		{
+			moveServices->SetForcedSubtickMove(i, subtickMoveTime);
+			subtickMoveTime += ENGINE_FIXED_TICK_INTERVAL;
+		}
+	}
+}

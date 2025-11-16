@@ -2,6 +2,7 @@
 #include "surf_checkpoint.h"
 #include "../option/surf_option.h"
 #include "../timer/surf_timer.h"
+#include "../style/surf_style.h"
 #include "../noclip/surf_noclip.h"
 #include "../language/surf_language.h"
 #include "surf/trigger/surf_trigger.h"
@@ -83,14 +84,6 @@ void SurfCheckpointService::SetCheckpoint()
 		return;
 	}
 
-	u32 flags = pawn->m_fFlags();
-	if (!(flags & FL_ONGROUND) && !(pawn->m_MoveType() == MOVETYPE_LADDER))
-	{
-		this->player->languageService->PrintChat(true, false, "Can't Checkpoint (Midair)");
-		this->player->PlayErrorSound();
-		return;
-	}
-
 	Checkpoint cp = {};
 	this->player->GetOrigin(&cp.origin);
 	this->player->GetAngles(&cp.angles);
@@ -142,12 +135,15 @@ void SurfCheckpointService::DoTeleport(i32 index)
 		this->player->PlayErrorSound();
 		return;
 	}
-	if (this->player->timerService->GetTimerRunning())
+	for (i32 i = 0; i < this->player->styleServices.Count(); i++)
 	{
-		// TODO: implement TAS style where checkpoints can be used
-		return;
+		if (SURF_STREQI(Surf::style::GetStyleInfo(this->player->styleServices[i]).shortName, "TAS"))
+		{
+			this->DoTeleport(this->checkpoints[this->currentCpIndex]);
+			return;
+		}
 	}
-	this->DoTeleport(this->checkpoints[this->currentCpIndex]);
+	this->player->languageService->PrintChat(true, false, "Can't Teleport (Not TAS)");
 }
 
 void SurfCheckpointService::DoTeleport(const Checkpoint cp)

@@ -63,7 +63,7 @@ class Surf85tModeService : public SurfModeService
 		(float)10.0f,   // sv_accelerate
 		(bool)false,    // sv_accelerate_use_weapon_speed
 		(float)150.0f,  // sv_airaccelerate
-		(float)37.41f,  // sv_air_max_wishspeed
+		(float)30.0f,   // sv_air_max_wishspeed
 		(bool)true,     // sv_autobunnyhopping
 		(float)0.0f,    // sv_bounce
 		(bool)true,     // sv_enablebunnyhopping
@@ -100,4 +100,7 @@ public:
 	virtual const char *GetModeName() override;
 	virtual const char *GetModeShortName() override;
 	virtual const CVValue_t *GetModeConVarValues() override;
+	virtual void OnSetupMove(PlayerCommand *) override;
+	virtual void OnPhysicsSimulate() override;
+	virtual void OnPhysicsSimulatePost() override;
 };

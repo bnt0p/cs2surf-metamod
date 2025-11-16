@@ -100,6 +100,7 @@ public:
 
 	virtual bool IsButtonPressed(InputBitMask_t button, bool onlyDown = false);
 	virtual bool IsButtonNewlyPressed(InputBitMask_t button);
+	virtual void DisableButton(InputBitMask_t button);
 
 	virtual void RegisterTakeoff(bool jumped, bool fromLadder = false, Vector *overrideOrigin = nullptr);
 	virtual void RegisterLanding(const Vector &landingVelocity, bool distbugFix = true);

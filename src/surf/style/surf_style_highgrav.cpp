@@ -1,20 +1,20 @@
-#include "surf_style_lowgrav.h"
+#include "surf_style_highgrav.h"
 
 #include "utils/addresses.h"
 #include "utils/interfaces.h"
 #include "utils/gameconfig.h"
 
-SurfLowGravStylePlugin g_SurfLowGravStylePlugin;
+SurfHighGravStylePlugin g_SurfHighGravStylePlugin;
 
 CGameConfig *g_pGameConfig = NULL;
 SurfUtils *g_pSurfUtils = NULL;
 SurfStyleManager *g_pStyleManager = NULL;
-StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfLowGravStyleService(player); };
-PLUGIN_EXPOSE(SurfLowGravStylePlugin, g_SurfLowGravStylePlugin);
+StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfHighGravStyleService(player); };
+PLUGIN_EXPOSE(SurfHighGravStylePlugin, g_SurfHighGravStylePlugin);
 
-const char *incompatibleStyles[] = {"HG"};
+const char *incompatibleStyles[] = {"LG"};
 
-bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+bool SurfHighGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
 	// Load mode
@@ -55,19 +55,19 @@ bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unload(char *error, size_t maxlen)
+bool SurfHighGravStylePlugin::Unload(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Pause(char *error, size_t maxlen)
+bool SurfHighGravStylePlugin::Pause(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unpause(char *error, size_t maxlen)
+bool SurfHighGravStylePlugin::Unpause(char *error, size_t maxlen)
 {
 	if (!g_pStyleManager->RegisterStyle(g_PLID, STYLE_NAME_SHORT, STYLE_NAME, g_StyleFactory))
 	{
@@ -81,17 +81,17 @@ CGameEntitySystem *GameEntitySystem()
 	return g_pSurfUtils->GetGameEntitySystem();
 }
 
-void SurfLowGravStyleService::Init()
+void SurfHighGravStyleService::Init()
 {
 	// called too early to set gravity scale here
 }
 
-const CVValue_t *SurfLowGravStyleService::GetTweakedConvarValue(const char *name)
+const CVValue_t *SurfHighGravStyleService::GetTweakedConvarValue(const char *name)
 {
 	return nullptr;
 }
 
-void SurfLowGravStyleService::Cleanup()
+void SurfHighGravStyleService::Cleanup()
 {
 	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
 	if (pawn)
@@ -100,11 +100,11 @@ void SurfLowGravStyleService::Cleanup()
 	}
 }
 
-void SurfLowGravStyleService::OnProcessMovement()
+void SurfHighGravStyleService::OnProcessMovement()
 {
 	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn && pawn->m_flActualGravityScale != 0.5f)
+	if (pawn && pawn->m_flActualGravityScale != 1.5f)
 	{
-		pawn->SetGravityScale(0.5f);
+		pawn->SetGravityScale(1.5f);
 	}
 }

@@ -1,20 +1,21 @@
-#include "surf_style_lowgrav.h"
+#include "surf_style_sideways.h"
+#include "sdk/usercmd.h"
 
 #include "utils/addresses.h"
 #include "utils/interfaces.h"
 #include "utils/gameconfig.h"
 
-SurfLowGravStylePlugin g_SurfLowGravStylePlugin;
+SurfSidewaysStylePlugin g_SurfSidewaysStylePlugin;
 
 CGameConfig *g_pGameConfig = NULL;
 SurfUtils *g_pSurfUtils = NULL;
 SurfStyleManager *g_pStyleManager = NULL;
-StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfLowGravStyleService(player); };
-PLUGIN_EXPOSE(SurfLowGravStylePlugin, g_SurfLowGravStylePlugin);
+StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfSidewaysStyleService(player); };
+PLUGIN_EXPOSE(SurfSidewaysStylePlugin, g_SurfSidewaysStylePlugin);
 
-const char *incompatibleStyles[] = {"HG"};
+const char *incompatibleStyles[] = {"HSW", "OnlyW"};
 
-bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+bool SurfSidewaysStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
 	// Load mode
@@ -55,19 +56,19 @@ bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unload(char *error, size_t maxlen)
+bool SurfSidewaysStylePlugin::Unload(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Pause(char *error, size_t maxlen)
+bool SurfSidewaysStylePlugin::Pause(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unpause(char *error, size_t maxlen)
+bool SurfSidewaysStylePlugin::Unpause(char *error, size_t maxlen)
 {
 	if (!g_pStyleManager->RegisterStyle(g_PLID, STYLE_NAME_SHORT, STYLE_NAME, g_StyleFactory))
 	{
@@ -81,30 +82,36 @@ CGameEntitySystem *GameEntitySystem()
 	return g_pSurfUtils->GetGameEntitySystem();
 }
 
-void SurfLowGravStyleService::Init()
-{
-	// called too early to set gravity scale here
-}
+void SurfSidewaysStyleService::Init() {}
 
-const CVValue_t *SurfLowGravStyleService::GetTweakedConvarValue(const char *name)
+const CVValue_t *SurfSidewaysStyleService::GetTweakedConvarValue(const char *name)
 {
 	return nullptr;
 }
 
-void SurfLowGravStyleService::Cleanup()
-{
-	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn)
-	{
-		pawn->SetGravityScale(1.0f);
-	}
-}
+void SurfSidewaysStyleService::Cleanup() {}
 
-void SurfLowGravStyleService::OnProcessMovement()
+void SurfSidewaysStyleService::OnSetupMove(PlayerCommand *pc)
 {
-	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn && pawn->m_flActualGravityScale != 0.5f)
+	auto subtickMoves = pc->mutable_base()->mutable_subtick_moves();
+	auto iterator = subtickMoves->begin();
+
+	while (iterator != subtickMoves->end())
 	{
-		pawn->SetGravityScale(0.5f);
+		uint64 button = iterator->button();
+		if (button == IN_MOVELEFT || button == IN_MOVERIGHT)
+		{
+			iterator = subtickMoves->erase(iterator);
+		}
+		else
+		{
+			iterator++;
+		}
 	}
+
+	pc->mutable_base()->set_leftmove(0.0f);
+
+	// disable buttons for HUD
+	this->player->DisableButton(IN_MOVELEFT);
+	this->player->DisableButton(IN_MOVERIGHT);
 }

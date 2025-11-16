@@ -1,20 +1,18 @@
-#include "surf_style_lowgrav.h"
+#include "surf_style_tas.h"
 
 #include "utils/addresses.h"
 #include "utils/interfaces.h"
 #include "utils/gameconfig.h"
 
-SurfLowGravStylePlugin g_SurfLowGravStylePlugin;
+SurfTASStylePlugin g_SurfTASStylePlugin;
 
 CGameConfig *g_pGameConfig = NULL;
 SurfUtils *g_pSurfUtils = NULL;
 SurfStyleManager *g_pStyleManager = NULL;
-StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfLowGravStyleService(player); };
-PLUGIN_EXPOSE(SurfLowGravStylePlugin, g_SurfLowGravStylePlugin);
+StyleServiceFactory g_StyleFactory = [](SurfPlayer *player) -> SurfStyleService * { return new SurfTASStyleService(player); };
+PLUGIN_EXPOSE(SurfTASStylePlugin, g_SurfTASStylePlugin);
 
-const char *incompatibleStyles[] = {"HG"};
-
-bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
+bool SurfTASStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
 	PLUGIN_SAVEVARS();
 	// Load mode
@@ -44,8 +42,7 @@ bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_
 		return false;
 	}
 
-	if (!g_pStyleManager->RegisterStyle(g_PLID, STYLE_NAME_SHORT, STYLE_NAME, g_StyleFactory, incompatibleStyles,
-										sizeof(incompatibleStyles) / sizeof(incompatibleStyles[0])))
+	if (!g_pStyleManager->RegisterStyle(g_PLID, STYLE_NAME_SHORT, STYLE_NAME, g_StyleFactory))
 	{
 		V_snprintf(error, maxlen, "Failed to register style");
 		return false;
@@ -55,19 +52,19 @@ bool SurfLowGravStylePlugin::Load(PluginId id, ISmmAPI *ismm, char *error, size_
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unload(char *error, size_t maxlen)
+bool SurfTASStylePlugin::Unload(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Pause(char *error, size_t maxlen)
+bool SurfTASStylePlugin::Pause(char *error, size_t maxlen)
 {
 	g_pStyleManager->UnregisterStyle(g_PLID);
 	return true;
 }
 
-bool SurfLowGravStylePlugin::Unpause(char *error, size_t maxlen)
+bool SurfTASStylePlugin::Unpause(char *error, size_t maxlen)
 {
 	if (!g_pStyleManager->RegisterStyle(g_PLID, STYLE_NAME_SHORT, STYLE_NAME, g_StyleFactory))
 	{
@@ -81,30 +78,11 @@ CGameEntitySystem *GameEntitySystem()
 	return g_pSurfUtils->GetGameEntitySystem();
 }
 
-void SurfLowGravStyleService::Init()
-{
-	// called too early to set gravity scale here
-}
+void SurfTASStyleService::Init() {}
 
-const CVValue_t *SurfLowGravStyleService::GetTweakedConvarValue(const char *name)
+const CVValue_t *SurfTASStyleService::GetTweakedConvarValue(const char *name)
 {
 	return nullptr;
 }
 
-void SurfLowGravStyleService::Cleanup()
-{
-	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn)
-	{
-		pawn->SetGravityScale(1.0f);
-	}
-}
-
-void SurfLowGravStyleService::OnProcessMovement()
-{
-	CCSPlayerPawn *pawn = this->player->GetPlayerPawn();
-	if (pawn && pawn->m_flActualGravityScale != 0.5f)
-	{
-		pawn->SetGravityScale(0.5f);
-	}
-}
+void SurfTASStyleService::Cleanup() {}

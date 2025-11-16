@@ -116,15 +116,15 @@ public:
 	}
 
 	// Movement hooks
-	void OnPhysicsSimulate() {}
+	virtual void OnPhysicsSimulate() {}
 
-	void OnPhysicsSimulatePost() {}
+	virtual void OnPhysicsSimulatePost() {}
 
 	void OnProcessUsercmds(void *, int) {}
 
 	void OnProcessUsercmdsPost(void *, int) {}
 
-	void OnSetupMove(PlayerCommand *);
+	virtual void OnSetupMove(PlayerCommand *) {}
 
 	void OnSetupMovePost(PlayerCommand *) {}
 

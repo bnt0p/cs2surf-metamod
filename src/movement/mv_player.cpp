@@ -236,6 +236,20 @@ bool MovementPlayer::IsButtonNewlyPressed(InputBitMask_t button)
 	return ms->m_nButtons()->IsButtonNewlyPressed(button);
 }
 
+void MovementPlayer::DisableButton(InputBitMask_t button)
+{
+	CCSPlayer_MovementServices *ms = this->GetMoveServices();
+	if (!ms)
+	{
+		return;
+	}
+
+	// clear all button states
+	ms->m_nButtons()->m_pButtonStates[0] &= ~button;
+	ms->m_nButtons()->m_pButtonStates[1] &= ~button;
+	ms->m_nButtons()->m_pButtonStates[2] &= ~button;
+}
+
 f32 MovementPlayer::GetGroundPosition()
 {
 	CMoveData *mv = this->currentMoveData;

@@ -225,8 +225,6 @@ void SurfPlayer::OnProcessMovement()
 	{
 		this->styleServices[i]->OnProcessMovement();
 	}
-
-	this->checkpointService->TpHoldPlayerStill();
 }
 
 void SurfPlayer::OnProcessMovementPost()

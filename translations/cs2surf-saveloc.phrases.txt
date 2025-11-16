@@ -34,6 +34,10 @@
 		"ko"		"{darkred}체크포인트를 설정하지 않았기 때문에 텔레포트할 수 없습니다."
 		"lv"		"{darkred}Tu nevari teleportēties, jo neesi iestatījis kontrolpunktu."
 	}
+	"Can't Teleport (Not TAS)"
+	{
+		"en"		"{darkred}You must be in the TAS style to teleport."
+	}
 	"Can't Teleport (Map)"
 	{
 		"en"		"{darkred}You can't teleport to your checkpoints in this area."
