@@ -120,6 +120,7 @@ private:
 
 	i32 currentStage {};
 	CUtlVectorFixed<f64, SURF_MAX_STAGE_ZONES> stageZoneTimes {};
+	CUtlVectorFixed<f64, SURF_MAX_STAGE_ZONES> stageEndTouchTimes {};
 
 	// PB cache per mode and per course.
 	std::unordered_map<PBDataKey, PBData> localPBCache;
@@ -272,6 +273,7 @@ public:
 	void StartZoneEndTouch(const SurfCourseDescriptor *course);
 	void CheckpointZoneStartTouch(const SurfCourseDescriptor *course, i32 cpNumber);
 	void StageZoneStartTouch(const SurfCourseDescriptor *course, i32 stageNumber);
+	void StageZoneEndTouch(const SurfCourseDescriptor *course, i32 stageNumber);
 	bool TimerStart(const SurfCourseDescriptor *course, bool playSound = true);
 	bool TimerEnd(const SurfCourseDescriptor *course);
 	bool TimerStop(bool playSound = true);

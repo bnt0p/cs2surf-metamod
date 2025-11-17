@@ -113,6 +113,7 @@ void SurfTimerService::StageZoneStartTouch(const SurfCourseDescriptor *course, i
 
 	assert(stageNumber > INVALID_STAGE_NUMBER && stageNumber < SURF_MAX_STAGE_ZONES);
 
+	// skipped stage
 	if (stageNumber > this->currentStage + 1)
 	{
 		this->PlayMissedZoneSound();
@@ -120,13 +121,33 @@ void SurfTimerService::StageZoneStartTouch(const SurfCourseDescriptor *course, i
 		return;
 	}
 
+	// same stage (failed)
+	if (stageNumber == this->currentStage)
+	{
+		return;
+	}
+
+	// next stage
 	if (stageNumber == this->currentStage + 1)
 	{
-		this->stageZoneTimes[this->currentStage] = this->GetTime();
+		this->stageZoneTimes[this->currentStage] = this->GetTime() - this->stageEndTouchTimes[this->currentStage];
+
 		this->PlayReachedStageSound();
 		this->ShowStageText();
 		this->currentStage++;
 	}
+}
+
+void SurfTimerService::StageZoneEndTouch(const SurfCourseDescriptor *course, i32 stageNumber)
+{
+	if (!this->timerRunning || course->guid != this->currentCourseGUID)
+	{
+		return;
+	}
+
+	assert(stageNumber > INVALID_STAGE_NUMBER && stageNumber < SURF_MAX_STAGE_ZONES);
+
+	this->stageEndTouchTimes[stageNumber] = this->GetTime();
 }
 
 bool SurfTimerService::TimerStart(const SurfCourseDescriptor *courseDesc, bool playSound)
@@ -163,23 +184,29 @@ bool SurfTimerService::TimerStart(const SurfCourseDescriptor *courseDesc, bool p
 
 	this->currentTime = 0.0f;
 	this->timerRunning = true;
-	if (courseDesc->stageCount > 0)
-	{
-		this->currentStage = 1;
-	}
-	else
-	{
-		this->currentStage = 0;
-	}
+
 	this->reachedCheckpoints = 0;
 	this->lastCheckpoint = 0;
 
 	f64 invalidTime = -1;
 	this->cpZoneTimes.SetSize(courseDesc->checkpointCount);
-	this->stageZoneTimes.SetSize(courseDesc->checkpointCount);
+	this->stageZoneTimes.SetSize(courseDesc->stageCount);
+	this->stageEndTouchTimes.SetSize(courseDesc->stageCount);
 
 	this->cpZoneTimes.FillWithValue(invalidTime);
 	this->stageZoneTimes.FillWithValue(invalidTime);
+	this->stageEndTouchTimes.FillWithValue(invalidTime);
+
+	if (courseDesc->stageCount > 0)
+	{
+		this->currentStage = 1;
+		// initialize stage 1 end touch time
+		this->stageEndTouchTimes[1] = this->GetTime();
+	}
+	else
+	{
+		this->currentStage = 0;
+	}
 
 	SetCourse(courseDesc->guid);
 	this->validTime = true;

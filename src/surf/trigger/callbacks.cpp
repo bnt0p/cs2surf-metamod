@@ -279,6 +279,7 @@ void SurfTriggerService::OnMappingApiTriggerTouchPost(TriggerTouchTracker tracke
 
 void SurfTriggerService::OnMappingApiTriggerEndTouchPost(TriggerTouchTracker tracker)
 {
+	const SurfTrigger *trigger = tracker.surfTrigger;
 	const SurfCourseDescriptor *course = Surf::mapapi::GetCourseDescriptorFromTrigger(tracker.surfTrigger);
 	if (Surf::mapapi::IsTimerTrigger(tracker.surfTrigger->type) && !course)
 	{
@@ -298,6 +299,11 @@ void SurfTriggerService::OnMappingApiTriggerEndTouchPost(TriggerTouchTracker tra
 		{
 			this->player->checkpointService->ResetCheckpoints();
 			this->player->timerService->StartZoneEndTouch(course);
+		}
+		break;
+		case SURFTRIGGER_ZONE_STAGE:
+		{
+			this->player->timerService->StageZoneEndTouch(course, trigger->zone.number);
 		}
 		break;
 		case SURFTRIGGER_PUSH:
